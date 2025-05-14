@@ -186,13 +186,15 @@ function(input, output, session)
         dynU = unmitigated();
         dynM = mitigated();
 
-        # TODO
-        # here, need to set the this and that
-
-        ggplot() +
+        plot = ggplot() +
             geom_line(data = dynU, aes(x = date, y = y), colour = "#afc6e9") +
             geom_line(data = dynM, aes(x = date, y = y), colour = "#0044aa") +
             labs(x = NULL, y = "Cases")
+
+        # TO DO... instead of passing input, pass some kind of reactiveValues thing created by overshiny
+        overlay_plot(input, plot)
+
+        return (plot)
     })
 
     # ---------- CONTROL PANEL ----------
