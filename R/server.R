@@ -211,7 +211,7 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
 {
     input = shiny::getDefaultReactiveDomain()$input
 
-    if (is_ggplot(plot)) {
+    if (ggplot2::is_ggplot(plot)) {
         rect = panel_rects_ggplot(plot)
         rect = rect[rect$row == row & rect$col == col]
         if (nrow(rect) != 1) {
