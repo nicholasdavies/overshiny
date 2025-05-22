@@ -31,7 +31,7 @@ usethis::use_vignette("")
 
 
 # BUILD CYCLE
-
+devtools::document()
 
 # RELEASE CYCLE
 

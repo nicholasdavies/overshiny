@@ -17,4 +17,13 @@ LazyData: true
 URL: https://github.com/nicholasdavies/overshiny
 BugReports: https://github.com/nicholasdavies/overshiny/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
+Imports: 
+    ggplot2,
+    grid,
+    htmltools,
+    htmlwidgets,
+    shiny,
+    shinyjs,
+    shinyjqui,
+    stringr
