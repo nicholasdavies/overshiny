@@ -19,7 +19,7 @@ overlayServer = function(outputId, nrect, width = NULL,
 
             for (nm in changed) {
                 val = current[[nm]]
-                cat("Input changed:", nm, "→",
+                cat("Input changed:", nm, "->",
                     if (is.atomic(val)) toString(val) else paste0("<", class(val), ">"), "\n")
             }
             old_inputs(current)
