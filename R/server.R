@@ -11,7 +11,7 @@ overlayServer = function(outputId, nrect, width = NULL,
     if (debug) {
         old_inputs = shiny::reactiveVal(list())
 
-        observe({
+        shiny::observe({
             current = shiny::reactiveValuesToList(input)
             previous = old_inputs()
             changed = names(current)[sapply(names(current),
@@ -132,11 +132,11 @@ overlayServer = function(outputId, nrect, width = NULL,
             clear_dropdowns()
             # Insert and make visible new dropdown
             if (!isTRUE(shiny::isolate(ov$editing) == i)) {
-                isolate({
+                shiny::isolate({
                     ov$editing = i;
                     insert_ui(ovid("dropdown", outputId, i),
                         ui = htmltools::div(id = ovid("menu"),
-                            uiOutput(paste(outputId, "menu", sep = "_")),
+                            shiny::uiOutput(paste(outputId, "menu", sep = "_")),
                             shiny::actionButton(inputId = "int_remove", label = "Remove",
                                 icon = shiny::icon("trash"), class = "overshiny-remove",
                                 `data-id` = ovid("overlay", outputId, i)

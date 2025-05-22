@@ -25,7 +25,7 @@ overlayColours = function(n)
     if (n <= 0) return (character(0))
     if (n <= 8) return (colours[picker[[n]]])
 
-    colorRampPalette(colours)(n)
+    grDevices::colorRampPalette(colours)(n)
 }
 
 overlayRects = function(outputId, n, display,

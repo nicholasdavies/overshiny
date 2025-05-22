@@ -1,7 +1,7 @@
 #' @export
 panel_rects_ggplot = function(plot)
 {
-    devsize = par("fin") * 25.4 # Device size in mm
+    devsize = graphics::par("fin") * 25.4 # Device size in mm
     built = ggplot2::ggplot_build(plot)
     gtable = ggplot2::ggplot_gtable(built)
     to_mm = function(x) grid::convertUnit(x, "mm", valueOnly = TRUE)
@@ -91,14 +91,14 @@ panel_rects_ggplot = function(plot)
 panel_rects_base = function()
 {
     # Get dimensions of plot
-    mfrow = par("mfrow")
+    mfrow = graphics::par("mfrow")
     if (!identical(mfrow, c(1L, 1L))) {
         stop("This only works with a single base plot, not multiple plots using mfrow/mfcol.")
     }
 
     # Add the currently active panel
-    plt = par("plt")
-    usr = par("usr")
+    plt = graphics::par("plt")
+    usr = graphics::par("usr")
 
     data = data.frame(panel_id = 1L, row = 1L, col = 1L, label = NA,
         x = plt[1], y = plt[3], w = plt[2] - plt[1], h = plt[4] - plt[3],
