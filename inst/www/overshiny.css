@@ -1,3 +1,22 @@
+/* Background grid for debugging
+body {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.3) 2px, transparent 2px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 2px, transparent 2px),
+    linear-gradient(to right, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+
+  background-size:
+    100px 100px,
+    100px 100px,
+    10px 10px,
+    10px 10px;
+}
+
+body *:not(script):not(style):not(head) {
+  opacity: 0.95;
+} */
+
 /* For draggable tokens */
 .overshiny-token {
     position: relative;

@@ -32,7 +32,7 @@ $(document).on("click", ".overshiny-display", function(event) {
     }, { priority: "event" });
 });
 
-// Patch selectize to work with jqui.
+// Patch selectize to work with jqui
 $(document).on("mousedown", ".selectize-dropdown .option", function(event) {
     event.preventDefault();
     $(this).trigger("click");
@@ -75,14 +75,38 @@ shsize = list(
 # For dropping tokens onto overlay display
 shdrop = list(
     add = list(
-        `drop` = htmlwidgets::JS("function(event, ui) {
+        `drop` = htmlwidgets::JS('function(event, ui) {
             return {
-                x: ui.position.left,
-                y: ui.position.top,
-                id: $(ui.draggable).attr('id'),
-                label: $(ui.draggable).data('label'),
+                x: ui.helper.offset().left, /*ui.position.left,*/
+                y: ui.helper.offset().top, /*ui.position.top,*/
+                id: $(ui.draggable).attr("id"),
+                label: $(ui.draggable).data("label"),
                 count: overshiny_count++
             };
-        }")
+        }')
     )
 )
+
+# TODO Plot resize
+# function observePlotResize(id, delay = 200) {
+#     var el = document.getElementById(id);
+#     if (!el) return;
+#
+#     let timeoutId = null;
+#
+#     new ResizeObserver(entries => {
+#         for (let entry of entries) {
+#             if (timeoutId) clearTimeout(timeoutId);
+#             timeoutId = setTimeout(() => {
+#                 const { width, height } = entry.contentRect;
+#                 Shiny.setInputValue("overshiny_event", {
+#                     id: "null",
+#                     what: "plot_size",
+#                     plotId: id,
+#                     width: width,
+#                     height: height
+#                 });
+#             }, delay);
+#         }
+#     }).observe(el);
+# }

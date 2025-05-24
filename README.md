@@ -10,6 +10,21 @@ need to define ranges, regions of interest, or intervals for further input
 or processing. Currently, the overlays are only designed to move along the
 x axis of the plot.
 
+## Status
+
+`overshiny` is under active development. There are some missing features.
+
+Missing features:
+- Doesn't handle R base plots yet.
+- Doesn't handle window resizing or plot resizing very well.
+- Some parts of the `ov` object returned by `overlayServer()` respond to being 
+changed, and some don't, and this is neither well-documented nor consistent.
+- The interface (via `ov`) doesn't allow full customization, e.g. of overlay
+styling.
+- No simple functionality to add a new overlay (without using a draggable 
+overlay token)
+
+
 ## Installation
 
 You can install the development version of overshiny from [GitHub](https://github.com/) with:
@@ -18,12 +33,6 @@ You can install the development version of overshiny from [GitHub](https://githu
 # install.packages("devtools")
 devtools::install_github("nicholasdavies/overshiny")
 ```
-
-## Bugs
-
-Some known bugs:
-- Doesn't handle window resizing causing the plot to resize.
-- Placement of overlays relative to the drop position of the token isn't perfect.
 
 ## Example
 

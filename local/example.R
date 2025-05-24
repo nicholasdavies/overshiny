@@ -31,7 +31,7 @@ ui <- fluidPage(
 
         mainPanel(
             # Main plot with support for overlays
-            overlayPlotOutput("plot", width = "100%", height = 300)
+            overlayPlotOutput("plot", width = 500, height = 300)
         )
     )
 )
@@ -41,8 +41,23 @@ server <- function(input, output, session)
 {
     # --- OVERLAY SETUP ---
 
+# Example of a valid snapping function: snap to nearest round number and
+# make sure the overlay is at least 10 units wide.
+mysnap <- function(ov, i) {
+    # remove any "out of bounds" overlays
+    oob <- seq_len(ov$n) %in% i &
+        (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
+    ov$active[oob] <- FALSE
+
+    # adjust position and with
+    widths <- pmax(10, round(ov$cx1[i] - ov$cx0[i]))
+    ov$cx0[i] <- pmax(round(ov$bound_cx),
+        pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
+    ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
+}
+
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56) # 56 days = 8 weeks default width
+    ov <- overlayServer("plot", 8, width = 56, snap = mysnap) # 56 days = 8 weeks default width
 
     # Reactive values to store custom per-overlay settings
     opt <- reactiveValues(
@@ -121,7 +136,7 @@ server <- function(input, output, session)
 
         overlayBounds(ov, plot,
             xlim = c(input$date_range),
-            ylim = c(0, NA))
+            ylim = c(0, NA) + 0 * ov$px)
     })
 }
 

@@ -1,4 +1,4 @@
-#' @export
+# Panel rects for ggplot2 plots
 panel_rects_ggplot = function(plot)
 {
     devsize = graphics::par("fin") * 25.4 # Device size in mm
@@ -87,7 +87,7 @@ panel_rects_ggplot = function(plot)
     return (p)
 }
 
-#' @export
+# Panel rects for base plots
 panel_rects_base = function()
 {
     # Get dimensions of plot

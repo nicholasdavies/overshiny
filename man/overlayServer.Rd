@@ -8,6 +8,7 @@ overlayServer(
   outputId,
   nrect,
   width = NULL,
+  snap = "none",
   colours = overlayColours,
   opacity = 0.25,
   icon = shiny::icon("gear"),
@@ -20,13 +21,17 @@ overlayServer(
 
 \item{nrect}{Number of overlay rectangles to support.}
 
-\item{width}{Optional default overlay width in plot coordinates. If \code{NULL},
-defaults to 10\% of the coordinate width.}
+\item{width}{Optional default overlay width in plot coordinates. If \code{NULL}
+(default), set to 10\% of the plot width.}
+
+\item{snap}{Function to "snap" overlay coordinates to a grid, or \code{"none"}
+(default) for no snapping. See details for how to specify the snap
+function.}
 
 \item{colours}{A function to assign custom colours to the overlays. Should
 be a function that takes a single integer (the number of overlays) and
-returns colours in hexadecimal notation, or any notation supported by
-CSS (e.g. "#FF0000", "red").}
+returns colours in hexadecimal notation (e.g. "#FF0000"). Do not provide
+opacity here as a fourth channel; use the \code{opacity} argument instead.}
 
 \item{opacity}{Numeric value (0 to 1) indicating overlay transparency.}
 
@@ -47,6 +52,7 @@ A \code{\link[shiny:reactiveValues]{shiny::reactiveValues()}} object with the fo
 \item{editing}{Index of the overlay currently being edited via the
 dropdown menu (if any; \code{NA} otherwise).}
 \item{last}{Index of the most recently added overlay.}
+\item{snap}{Coordinate snapping function.}
 \item{px, pw}{Overlay x-position and width in pixels.}
 \item{py, ph}{Overlay y-position and height in pixels.}
 \item{cx0, cx1}{Overlay x-bounds in plot coordinates.}
@@ -77,6 +83,24 @@ This function also defines a dynamic output UI slot with ID
 When a user clicks the overlay's dropdown icon, this menu becomes visible
 and can be populated with inputs for editing overlay-specific settings, e.g.
 labels or numeric parameters tied to that overlay.
+
+If you provide a coordinate snapping function (\code{snap} argument), it should
+have the signature \verb{function(ov, i)} where \code{ov} is the
+\code{\link[shiny:reactiveValues]{shiny::reactiveValues()}} object defining the overlays and their settings,
+and \code{i} is the set of indices for the rectangles to be updated. The
+intention is that you should change the values of \code{ov$cx0[i]} and
+\code{ov$cx1[i]}; the pixel coordinates of the overlays will then be updated
+automatically after the snapping function returns. You should make sure that
+all \code{ov$cx0[i]} and \code{ov$cx1[i]} are within the coordinate bounds defined by
+the plot, i.e. constrained by \code{ov$bound_cx} and \code{ov$bound_cw}, when the
+function returns. This means, for example, if you are "rounding down"
+\code{ov$cx0[i]} to some nearest multiple of a number, you should make sure it
+doesn't become less than \code{ov$bound_cx}. Finally, the snapping function will
+get triggered when the x axis range of the plot changes, so it may be a good
+idea to provide one if the user might place an overlay onto the plot, but
+then change the x axis range of the plot such that the overlay is no longer
+visible. You can detect this by verifying whether the overlay rectangles are
+"out of bounds" at the top of your snapping function. See example below.
 }
 \examples{
 \dontrun{
@@ -93,6 +117,21 @@ server <- function(input, output) {
         i <- req(ov$editing)
         ov$label[i] <- input$label_input
     })
+}
+
+# Example of a valid snapping function: snap to nearest round number and
+# make sure the overlay is at least 10 units wide.
+mysnap <- function(ov, i) {
+    # remove any "out of bounds" overlays
+    oob <- seq_len(ov$n) \%in\% i &
+        (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
+    ov$active[oob] <- FALSE
+
+    # adjust position and with
+    widths <- pmax(10, round(ov$cx1[i] - ov$cx0[i]))
+    ov$cx0[i] <- pmax(round(ov$bound_cx),
+        pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
+    ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
 }
 }
 

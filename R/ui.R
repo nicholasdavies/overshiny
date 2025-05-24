@@ -99,7 +99,7 @@ overlayRects = function(outputId, n, display,
             htmltools::div(id = ovid("dropdown", outputId, i),
                 class = "overshiny-dropdown"),
             id = ovid("overlay", outputId, i),
-            style = paste0("background-color: ", col[i], ";  display: ", display),
+            style = paste0("background-color: ", col[i], "; display: ", display),
             class = "overshiny-noselect overshiny-rect"
         )
     }

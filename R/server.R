@@ -17,14 +17,35 @@
 #' and can be populated with inputs for editing overlay-specific settings, e.g.
 #' labels or numeric parameters tied to that overlay.
 #'
+#' If you provide a coordinate snapping function (`snap` argument), it should
+#' have the signature `function(ov, i)` where `ov` is the
+#' [shiny::reactiveValues()] object defining the overlays and their settings,
+#' and `i` is the set of indices for the rectangles to be updated. The
+#' intention is that you should change the values of `ov$cx0[i]` and
+#' `ov$cx1[i]`; the pixel coordinates of the overlays will then be updated
+#' automatically after the snapping function returns. You should make sure that
+#' all `ov$cx0[i]` and `ov$cx1[i]` are within the coordinate bounds defined by
+#' the plot, i.e. constrained by `ov$bound_cx` and `ov$bound_cw`, when the
+#' function returns. This means, for example, if you are "rounding down"
+#' `ov$cx0[i]` to some nearest multiple of a number, you should make sure it
+#' doesn't become less than `ov$bound_cx`. Finally, the snapping function will
+#' get triggered when the x axis range of the plot changes, so it may be a good
+#' idea to provide one if the user might place an overlay onto the plot, but
+#' then change the x axis range of the plot such that the overlay is no longer
+#' visible. You can detect this by verifying whether the overlay rectangles are
+#' "out of bounds" at the top of your snapping function. See example below.
+#'
 #' @param outputId The ID of the plot output (as used in [overlayPlotOutput()]).
 #' @param nrect Number of overlay rectangles to support.
-#' @param width Optional default overlay width in plot coordinates. If `NULL`,
-#'     defaults to 10% of the coordinate width.
+#' @param width Optional default overlay width in plot coordinates. If `NULL`
+#'     (default), set to 10% of the plot width.
+#' @param snap Function to "snap" overlay coordinates to a grid, or `"none"`
+#'     (default) for no snapping. See details for how to specify the snap
+#'     function.
 #' @param colours A function to assign custom colours to the overlays. Should
 #'     be a function that takes a single integer (the number of overlays) and
-#'     returns colours in hexadecimal notation, or any notation supported by
-#'     CSS (e.g. "#FF0000", "red").
+#'     returns colours in hexadecimal notation (e.g. "#FF0000"). Do not provide
+#'     opacity here as a fourth channel; use the `opacity` argument instead.
 #' @param opacity Numeric value (0 to 1) indicating overlay transparency.
 #' @param icon A Shiny icon to show the dropdown menu.
 #' @param stagger Vertical offset between stacked overlays, as a proportion of
@@ -40,6 +61,7 @@
 #'   \item{editing}{Index of the overlay currently being edited via the
 #'       dropdown menu (if any; `NA` otherwise).}
 #'   \item{last}{Index of the most recently added overlay.}
+#'   \item{snap}{Coordinate snapping function.}
 #'   \item{px, pw}{Overlay x-position and width in pixels.}
 #'   \item{py, ph}{Overlay y-position and height in pixels.}
 #'   \item{cx0, cx1}{Overlay x-bounds in plot coordinates.}
@@ -68,12 +90,27 @@
 #'         ov$label[i] <- input$label_input
 #'     })
 #' }
+#'
+#' # Example of a valid snapping function: snap to nearest round number and
+#' # make sure the overlay is at least 10 units wide.
+#' mysnap <- function(ov, i) {
+#'     # remove any "out of bounds" overlays
+#'     oob <- seq_len(ov$n) %in% i &
+#'         (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
+#'     ov$active[oob] <- FALSE
+#'
+#'     # adjust position and with
+#'     widths <- pmax(10, round(ov$cx1[i] - ov$cx0[i]))
+#'     ov$cx0[i] <- pmax(round(ov$bound_cx),
+#'         pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
+#'     ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
+#' }
 #' }
 #'
 #' @seealso [overlayPlotOutput()], [overlayBounds()]
 #'
 #' @export
-overlayServer = function(outputId, nrect, width = NULL,
+overlayServer = function(outputId, nrect, width = NULL, snap = "none",
     colours = overlayColours, opacity = 0.25, icon = shiny::icon("gear"),
     stagger = 0.045, debug = FALSE)
 {
@@ -106,6 +143,9 @@ overlayServer = function(outputId, nrect, width = NULL,
     shinyjqui::jqui_draggable(ui = ovmatch("token"),
         options = list(revert = TRUE, helper = "clone", opacity = 0.75, revertDuration = 0, zIndex = 9999));
 
+    # TODO Monitor resizing of plot
+    # shinyjs::runjs(paste0('observePlotResize("', outputId, '")'));
+
     # ---------- OVERLAY SETUP ----------
 
     # Run setup code for the display
@@ -137,6 +177,7 @@ overlayServer = function(outputId, nrect, width = NULL,
         show      = TRUE,           # show overlays?
         editing   = NA,             # which overlay is currently being edited via dropdown
         last      = NA,             # which overlay was last to be added
+        snap      = snap,           # coordinate snapping function
         px        = rep(0, nrect),  # left pixel position of overlay
         pw        = rep(0, nrect),  # pixel width of overlay
         py        = rep(0, nrect),  # bottom pixel position of overlay
@@ -157,22 +198,39 @@ overlayServer = function(outputId, nrect, width = NULL,
         # Set cx0 and cx1
         ov$cx0[i] = (ov$px[i] / ov$bound_pw) * ov$bound_cw + ov$bound_cx;
         ov$cx1[i] = ((ov$px[i] + ov$pw[i]) / ov$bound_pw) * ov$bound_cw + ov$bound_cx;
+
+        if (!identical(ov$snap, "none")) {
+            ov$update_px(i)
+        }
     }
 
     # Set px and pw of all overlays from cx0 and cx1
-    ov$update_px = function() {
-        # Ensure times are in proper range
-        ov$cx0 = pmax(ov$cx0, ov$bound_cx);
-        ov$cx1 = pmin(ov$cx1, ov$bound_cx + ov$bound_cw);
+    ov$update_px = function(j = seq_len(ov$n)) {
+        if (identical(ov$snap, "none")) {
+            # Ensure times are in proper range
+            ov$cx0[j] = pmax(ov$cx0[j], ov$bound_cx);
+            ov$cx1[j] = pmin(ov$cx1[j], ov$bound_cx + ov$bound_cw);
+        } else {
+            # Snap coordinates
+            ov$snap(ov, j)
+        }
 
         # Set px and pw, as well as updating actual positions
-        ov$px = (ov$cx0 - ov$bound_cx) * ov$bound_pw / ov$bound_cw;
-        ov$pw = (ov$cx1 - ov$cx0) * ov$bound_pw / ov$bound_cw;
-        for (i in seq_len(ov$n)) {
+        ov$px[j] = (ov$cx0[j] - ov$bound_cx) * ov$bound_pw / ov$bound_cw;
+        ov$pw[j] = (ov$cx1[j] - ov$cx0[j]) * ov$bound_pw / ov$bound_cw;
+        for (i in j) {
             setcss(ovid("overlay", outputId, i), position = "absolute",
                 left = ov$px[i], width = ov$pw[i], bottom = ov$py[i], height = ov$ph[i]);
         }
     }
+
+    # Make overlays respond to ov$active and ov$show
+    shiny::observe({
+        for (i in seq_len(ov$n)) {
+            setcss(ovid("overlay", outputId, i),
+                display = if (ov$active[i] && ov$show) "block" else "none")
+        }
+    })
 
     # Close all dropdowns and their contents
     clear_dropdowns = function() {
@@ -228,10 +286,11 @@ overlayServer = function(outputId, nrect, width = NULL,
                 ov$editing = NA;
             })
             clear_dropdowns()
-            setcss(ovid("overlay", outputId, i), display = "none");
         } else if (input$overshiny_event$what == "defocus") {
             ov$editing = NA;
             clear_dropdowns()
+        } else if (input$overshiny_event$what == "plot_size") {
+            # TODO This wasn't quite working anyway.
         } else if (input$overshiny_event$what == "debug") {
             cat(input$overshiny_event$text, "\n")
         }
@@ -254,18 +313,12 @@ overlayServer = function(outputId, nrect, width = NULL,
                 ov$update_cx(i);
                 ov$active[i] = TRUE;
                 ov$label[i] = input[[drop_event]]$label;
+
+                # Position overlay
+                setcss(ovid("overlay", outputId, i),
+                    left = ov$px[i], width = ov$pw[i],
+                    bottom = ov$py[i], height = ov$ph[i]);
             })
-
-            # ###
-            # drop_x <- input[[drop_event]]$x
-            # message("Drop x: ", drop_x)
-            # message("Bound px: ", ov$bound_px)
-            # message("Drop minus bound: ", drop_x - ov$bound_px)
-
-            # Position and apparate overlay
-            setcss(ovid("overlay", outputId, i), display = "block",
-                left = ov$px[i], width = ov$pw[i],
-                bottom = ov$py[i], height = ov$ph[i]);
         }
     });
 
@@ -274,14 +327,6 @@ overlayServer = function(outputId, nrect, width = NULL,
         shiny::isolate({
             for (i in seq_len(ov$n)) {
                 shinyjs::html(ovid("label", outputId, i), ov$label[i]);
-            }
-    })})
-
-    # Show/hide overlays as needed
-    shiny::observeEvent(ov$show, {
-        shiny::isolate({
-            for (i in seq_len(ov$n)) {
-                setcss(ovid("overlay", outputId, i), display = if (ov$active[i] && ov$show) "block" else "none");
             }
     })})
 
@@ -348,13 +393,13 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
         outputId = shiny::isolate(ov$outputId)
         shinyjs::runjs(paste0(
             'var plot = $("#', outputId, '");\n',
-            'var disp = $("#', ovid("display", outputId), '");\n',
-            'Shiny.setInputValue("overshiny_return", [plot.width(), plot.height(), plot.offset().left]);'
+            'Shiny.setInputValue("overshiny_return",',
+            ' [plot.width(), plot.height(), plot.offset().left]);'
         ))
+        shiny::req(input$overshiny_return)
         img_width = input$overshiny_return[1];
         img_height = input$overshiny_return[2];
         left_offset = input$overshiny_return[3];
-        cat("Left offset:", left_offset, "\n")###
 
         l = bx * img_width
         w = bw * img_width
@@ -364,7 +409,7 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
         shiny::isolate({
             ov$bound_cx = xlim[1]
             ov$bound_cw = xlim[2] - xlim[1]
-            ov$bound_px = l + left_offset ###
+            ov$bound_px = l + left_offset
             ov$bound_pw = w
             ov$py = rep(0, ov$n)
             ov$ph = h * (1 - 1:ov$n * ov$stagger)
