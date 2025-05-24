@@ -33,7 +33,6 @@ fluidPage(theme = shinytheme("sandstone"),
     shinyWidgets::chooseSliderSkin("Square"),
 
     h3(id = "title", style = "text-align: center", "CMMID COVID-19 transmission app"),
-    # shinyBS::bsPopover("help_tooltips", "Show help", "Enables in-app help, which appears in bubbles like this one.", placement = "bottom", trigger = "hover", options = list(container = "body")),
 
     # ---------- DISPLAY PANEL ----------
 
@@ -44,21 +43,13 @@ fluidPage(theme = shinytheme("sandstone"),
     # padding: 10px can be adjusted, but this needs to be accounted for within the overshiny-bounds- element.
     # position: relative is critical.
     div(style = "max-width: 800px; min-width: 800px; margin: 0 auto; float: none; padding: 10px; border-radius: 20px 10px 10px 10px; border: 1px solid #dddddd; position:relative",
-        # # Help button
-        # div(id = "help_loc", style = "position: absolute; right: 10px; top: 10px",
-        #     shinyBS::bsButton("help_tooltips", label = HTML("Show help"), icon = icon("question-circle", "fa"), style = "info", size = "small", type = "toggle", value = FALSE)
-        # ),
-        #
-        # # Compare button
-        # div(id = "compare_loc", style = "position: absolute; right: 112px; top: 10px",
-        #     shinyBS::bsButton("compare", label = HTML("Compare"), icon = icon("exchange-alt", "fa"), style = "info", size = "small", type = "toggle", value = TRUE)
-        # ),
-
         # Display tabs
         tabsetPanel(id = "display_tabs",
-            tabPanel(value = "cases", title = iconTab("tab_cases", "Cases", "head-side-cough"),
-                overlayPlotOutput("cases_plot", width = 760, height = 400), style = "padding:10px")
-        )
+            tabPanel(value = "cases", title = iconTab("tab_cases", "Cases", "head-side-cough")),
+            tabPanel(value = "health", title = iconTab("tab_health", "Health", "star-of-life")),
+            tabPanel(value = "credits", title = iconTab("tab_credits", "Credits", "user-tag")),
+        ),
+        div(style = "padding: 10px", overlayPlotOutput("plot", width = 760, height = 400))
     ),
 
     # ---------- CONTROL PANEL ----------

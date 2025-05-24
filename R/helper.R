@@ -1,18 +1,16 @@
-nbsp = function(text)
-{
-    stringr::str_replace_all(text, c(" " = "&nbsp;", "-" = "&#8209;"))
-}
-
+# Underscore-separated id
 ovid = function(...)
 {
     paste("overshiny", ..., sep = "_")
 }
 
+# ovid, with # at front (jQuery selector for that id)
 ovsel = function(...)
 {
     paste0("#", ovid(...))
 }
 
+# jQuery selector for ids starting with
 ovmatch = function(...)
 {
     paste0("[id^='", ovid(...), "']")

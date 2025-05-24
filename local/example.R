@@ -1,35 +1,3 @@
-# overshiny: Interactive overlays in Shiny plots
-
-<!-- badges: start -->
-[![R-CMD-check](https://github.com/nicholasdavies/overshiny/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nicholasdavies/overshiny/actions/workflows/R-CMD-check.yaml)
-<!-- badges: end -->
-
-`overshiny` provides draggable and resizable rectangular elements that
-overlay plots in Shiny apps. This may be useful in applications where users
-need to define ranges, regions of interest, or intervals for further input
-or processing. Currently, the overlays are only designed to move along the
-x axis of the plot.
-
-## Installation
-
-You can install the development version of overshiny from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("nicholasdavies/overshiny")
-```
-
-## Bugs
-
-Some known bugs:
-- Doesn't handle window resizing causing the plot to resize.
-- Placement of overlays relative to the drop position of the token isn't perfect.
-
-## Example
-
-This example shows the basic functionality of `overshiny`:
-
-``` r
 library(shiny)
 library(ggplot2)
 library(overshiny)
@@ -159,5 +127,4 @@ server <- function(input, output, session)
 
 # --- Run app ---
 shinyApp(ui, server)
-```
 

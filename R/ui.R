@@ -1,12 +1,67 @@
+#' Set up a Shiny app to use overshiny
+#'
+#' Put [useOverlay()] in your Shiny app's UI to use `overshiny`'s interactive
+#' plot overlays.
+#'
+#' This can go anywhere in your UI and it can be inserted multiple times with
+#' no ill effect. This also calls [shinyjs::useShinyjs()], as `overshiny`
+#' depends on `shinyjs`.
+#'
+#' @return Returns HTML that gets inserted into the `<head>` of your app.
+#'
+#' @examples
+#' \dontrun{
+#' ui <- fluidPage(
+#'     useOverlay(),
+#'     # further UI elements here . . .
+#' )
+#'
+#' server <- function(input, output) {
+#'     # server code here . . .
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#'
 #' @export
 useOverlay = function()
 {
-    htmltools::tags$head(
-        overshiny_style,
-        overshiny_script
+    shiny::singleton(
+        htmltools::tags$head(
+            shinyjs::useShinyjs(),
+            htmltools::tags$link(rel = "stylesheet", type = "text/css", href = "overshiny/overshiny.css"),
+            overshiny_script
+        )
     )
 }
 
+#' Create an overlay token input control
+#'
+#' Create a token that can be dragged onto an (overlay plot)[overlayPlotOutput()]
+#' to create a new overlay.
+#'
+#' Note that the DOM ID of the token will be converted to
+#' `"overshiny_token_<inputId>"`. This transformed ID is important for internal
+#' interaction logic (e.g. for use with JavaScript drag/drop handlers). When
+#' referencing the token programmatically (e.g. in CSS selectors or custom
+#' JavaScript), use the full prefixed ID (see examples).
+#'
+#' @param inputId The `input` slot used for the token.
+#' @param name Text (or HTML) to be displayed on the token itself.
+#' @param label Text label that will appear on the overlay.
+#'
+#' @return An overlay token input control that can be added to a UI definition.
+#'
+#' @examples
+#' \dontrun{
+#' ui <- fluidPage(
+#'     useOverlay(),
+#'     overlayToken("add", "Add new overlay", "Overlay"),
+#'     # The token's HTML id will be "overshiny_token_add"
+#'     tags$style(HTML("#overshiny_token_add { cursor: grab; }"))
+#' )
+#' }
+#'
 #' @export
 overlayToken = function(inputId, name, label = name)
 {
@@ -64,12 +119,34 @@ overlayDisplay = function(outputId, width, height, element)
     )
 }
 
-#' @export
 overlayImageOutput = function(outputId, width, height)
 {
     overlayDisplay(outputId, width, height, shiny::imageOutput(outputId, width, height))
 }
 
+#' Create a plot output element with overlays
+#'
+#' Render a [shiny::renderPlot()] within an application page, with support for
+#' overlays.
+#'
+#' @param outputId The `output` slot where the plot will be rendered using
+#'     [shiny::renderPlot()], with a call to [overlayBounds()].
+#' @param width,height Image width and height. Must be a valid CSS unit, like
+#'     `"100%"`, `"400px"`, or `"auto"`, or a number, interpreted as pixels.
+#'
+#' @return A plot output element that can be added to a UI definition.
+#'
+#' @examples
+#' \dontrun{
+#' ui <- fluidPage(
+#'     useOverlay(),
+#'     overlayPlotOutput("my_plot", 640, 480)
+#'     # further UI elements here . . .
+#' )
+#' }
+#'
+#' @seealso [overlayBounds()]
+#'
 #' @export
 overlayPlotOutput = function(outputId, width, height)
 {

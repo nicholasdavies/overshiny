@@ -3,14 +3,14 @@
 function(input, output, session)
 {
     # ---------- SET UP ----------
-    ov = overlayServer("cases_plot", 8, width = 56,
+    ov = overlayServer("plot", 8, width = 56,
         colours = heat.colors, opacity = 0.25, icon = icon("play"))
     opt = reactiveValues(
         type = rep(1, 8),
         strength = rep(50, 8)
     )
 
-    output$cases_plot_menu = renderUI({
+    output$plot_menu = renderUI({
         i = req(ov$editing);
         tagList(
             textOutput("menuLabel"),
@@ -83,16 +83,32 @@ function(input, output, session)
 
     # ---------- DISPLAY PANEL ----------
 
-    # Cases view
-    output$cases_plot = renderPlot({
+    output$plot = renderPlot({
         dynU = unmitigated();
         dynM = mitigated();
 
-        plot = ggplot() +
-            geom_line(data = dynU, aes(x = date, y = y), colour = "#afc6e9") +
-            geom_line(data = dynM, aes(x = date, y = y), colour = "#0044aa") +
-            ylim(0, NA) +
-            labs(x = NULL, y = "Cases")
+        if (input$display_tabs == "cases") {
+            ov$show = TRUE
+            plot = ggplot() +
+                geom_line(data = dynU, aes(x = date, y = y), colour = "#afc6e9") +
+                geom_line(data = dynM, aes(x = date, y = y), colour = "#0044aa") +
+                ylim(0, NA) +
+                labs(x = NULL, y = "Cases")
+        } else if (input$display_tabs == "health") {
+            ov$show = TRUE
+            plot = ggplot() +
+                geom_line(data = dynU, aes(x = date, y = y), colour = "#afc6e9") +
+                geom_line(data = dynM, aes(x = date, y = y), colour = "#0044aa") +
+                ylim(0, NA) +
+                labs(x = NULL, y = "Health\nHealth\nHealth")
+        } else if (input$display_tabs == "credits") {
+            ov$show = FALSE
+            plot = ggplot() +
+                geom_label(data = dynU, aes(x = date, y = y, label = "By CMMID")) +
+                geom_label(data = dynM, aes(x = date, y = y, label = "By CMMID")) +
+                ylim(0, NA) +
+                labs(x = NULL, y = NULL)
+        }
 
         overlayBounds(ov, plot,
             xlim = c(params$date0, params$date0 + params$time1),

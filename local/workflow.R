@@ -27,11 +27,15 @@ usethis::write_union("./.Rbuildignore", "^local$")
 usethis::use_package("")
 
 # Add vignette
-usethis::use_vignette("")
+usethis::use_vignette("overshiny")
 
 
 # BUILD CYCLE
 devtools::document()
+devtools::build_vignettes()
+
+devtools::build(vignettes = TRUE)
+devtools::install(build_vignettes = TRUE)
 
 # RELEASE CYCLE
 

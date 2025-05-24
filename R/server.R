@@ -1,3 +1,77 @@
+#' Add interactive overlays to a Shiny plot
+#'
+#' This function sets up server-side infrastructure to support draggable and
+#' resizable overlays on a plot. This may be useful in applications where users
+#' need to define ranges, regions of interest, or intervals for further input
+#' or processing. Currently, the overlays are only designed to move along the
+#' x axis of the plot.
+#'
+#' Call this function once from your server code to initialise a set of overlay
+#' rectangles for a specific plot. It creates reactive handlers for move,
+#' resize, and dropdown menu actions, and allows adding new overlays by
+#' dragging an [overlayToken()] onto the plot.
+#'
+#' This function also defines a dynamic output UI slot with ID
+#' `paste0(outputId, "_menu")`, which can be rendered using [shiny::renderUI()].
+#' When a user clicks the overlay's dropdown icon, this menu becomes visible
+#' and can be populated with inputs for editing overlay-specific settings, e.g.
+#' labels or numeric parameters tied to that overlay.
+#'
+#' @param outputId The ID of the plot output (as used in [overlayPlotOutput()]).
+#' @param nrect Number of overlay rectangles to support.
+#' @param width Optional default overlay width in plot coordinates. If `NULL`,
+#'     defaults to 10% of the coordinate width.
+#' @param colours A function to assign custom colours to the overlays. Should
+#'     be a function that takes a single integer (the number of overlays) and
+#'     returns colours in hexadecimal notation, or any notation supported by
+#'     CSS (e.g. "#FF0000", "red").
+#' @param opacity Numeric value (0 to 1) indicating overlay transparency.
+#' @param icon A Shiny icon to show the dropdown menu.
+#' @param stagger Vertical offset between stacked overlays, as a proportion of
+#'     height.
+#' @param debug If `TRUE`, prints changes to input values to the console for
+#'     debugging purposes.
+#'
+#' @return A [shiny::reactiveValues()] object with the following named fields:
+#' \describe{
+#'   \item{n}{Number of overlays.}
+#'   \item{active}{Logical vector of length `n`; indicates which overlays are active.}
+#'   \item{show}{Logical; controls whether overlays are visible.}
+#'   \item{editing}{Index of the overlay currently being edited via the
+#'       dropdown menu (if any; `NA` otherwise).}
+#'   \item{last}{Index of the most recently added overlay.}
+#'   \item{px, pw}{Overlay x-position and width in pixels.}
+#'   \item{py, ph}{Overlay y-position and height in pixels.}
+#'   \item{cx0, cx1}{Overlay x-bounds in plot coordinates.}
+#'   \item{label}{Character vector of labels shown at the top of each overlay.}
+#'   \item{outputId}{The output ID of the plot display area.}
+#'   \item{bound_cx, bound_cw}{x-position and width of the bounding area in plot coordinates.}
+#'   \item{bound_px, bound_pw}{x-position and width of the bounding area in pixels.}
+#'   \item{stagger}{Amount of vertical staggering (as proportion of height).}
+#'   \item{update_cx(i)}{Function to update `cx0`/`cx1` from `px`/`pw` for overlay `i`.}
+#'   \item{update_px()}{Function to update `px`/`pw` from `cx0`/`cx1` for all overlays.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' server <- function(input, output) {
+#'     ov <- overlayServer("my_plot", 4)
+#'     ov$label <- LETTERS[1:4]
+#'
+#'     output$my_plot_menu <- renderUI({
+#'         i <- req(ov$editing)
+#'         textInput("label_input", "Overlay label", value = ov$label[i])
+#'     })
+#'
+#'     observeEvent(input$label_input, {
+#'         i <- req(ov$editing)
+#'         ov$label[i] <- input$label_input
+#'     })
+#' }
+#' }
+#'
+#' @seealso [overlayPlotOutput()], [overlayBounds()]
+#'
 #' @export
 overlayServer = function(outputId, nrect, width = NULL,
     colours = overlayColours, opacity = 0.25, icon = shiny::icon("gear"),
@@ -30,7 +104,7 @@ overlayServer = function(outputId, nrect, width = NULL,
 
     # Intervention tokens
     shinyjqui::jqui_draggable(ui = ovmatch("token"),
-        options = list(revert = TRUE, helper = "clone", opacity = 0.75, revertDuration = 0));
+        options = list(revert = TRUE, helper = "clone", opacity = 0.75, revertDuration = 0, zIndex = 9999));
 
     # ---------- OVERLAY SETUP ----------
 
@@ -60,6 +134,7 @@ overlayServer = function(outputId, nrect, width = NULL,
     ov = shiny::reactiveValues(
         n         = nrect,          # number of overlays
         active    = rep(F, nrect),  # is the overlay active
+        show      = TRUE,           # show overlays?
         editing   = NA,             # which overlay is currently being edited via dropdown
         last      = NA,             # which overlay was last to be added
         px        = rep(0, nrect),  # left pixel position of overlay
@@ -74,8 +149,7 @@ overlayServer = function(outputId, nrect, width = NULL,
         bound_cw  = 0,              # width of bounds in coords (set by overlayBounds)
         bound_px  = 0,              # x-pos of bounds in pixels (set by overlayBounds)
         bound_pw  = 0,              # width of bounds in pixels (set by overlayBounds)
-        stagger   = stagger,        # how much to stagger down each overlay
-        opt       = list()          # container for user-specified settings
+        stagger   = stagger         # how much to stagger down each overlay
     );
 
     # Set cx0 and cx1 of overlay i from px and pw
@@ -163,9 +237,6 @@ overlayServer = function(outputId, nrect, width = NULL,
         }
     })
 
-
-    # ---------- ADD OVERLAY ----------
-
     # Add new overlay
     drop_event = ovid("display", outputId, "add")
     shiny::observeEvent(input[[drop_event]], priority = 999, {
@@ -174,9 +245,6 @@ overlayServer = function(outputId, nrect, width = NULL,
             clear_dropdowns()
 
             # Set overlay position and label and mark as active
-            # TODO there could be some more specific positioning than input[[drop_event]]$x - ov$bound_px.
-            # This seems to work well enough, but I haven't quite gotten to the bottom of what input[[drop_event]]$x
-            # really means; it doesn't seem to be strictly relative to the "display" element (but who knows).
             default_width = if (is.null(width)) 0.1 * ov$bound_pw else width
             shiny::isolate({
                 ov$editing = NA;
@@ -187,6 +255,12 @@ overlayServer = function(outputId, nrect, width = NULL,
                 ov$active[i] = TRUE;
                 ov$label[i] = input[[drop_event]]$label;
             })
+
+            # ###
+            # drop_x <- input[[drop_event]]$x
+            # message("Drop x: ", drop_x)
+            # message("Bound px: ", ov$bound_px)
+            # message("Drop minus bound: ", drop_x - ov$bound_px)
 
             # Position and apparate overlay
             setcss(ovid("overlay", outputId, i), display = "block",
@@ -199,13 +273,49 @@ overlayServer = function(outputId, nrect, width = NULL,
     shiny::observeEvent(ov$label, {
         shiny::isolate({
             for (i in seq_len(ov$n)) {
-                shinyjs::html(ovid("label", ov$outputId, i), ov$label[i]);
+                shinyjs::html(ovid("label", outputId, i), ov$label[i]);
+            }
+    })})
+
+    # Show/hide overlays as needed
+    shiny::observeEvent(ov$show, {
+        shiny::isolate({
+            for (i in seq_len(ov$n)) {
+                setcss(ovid("overlay", outputId, i), display = if (ov$active[i] && ov$show) "block" else "none");
             }
     })})
 
     return (ov)
 }
 
+#' Align overlays with a ggplot2 plot
+#'
+#' Sets the pixel and coordinate bounds of the overlay area based on a
+#' [ggplot2::ggplot()] object. This ensures that overlays are positioned
+#' correctly in both visual and coordinate space. Currently only `ggplot2`
+#' plots are supported.
+#'
+#' Call this function within [shiny::renderPlot()], before returning the plot
+#' object.
+#'
+#' @param ov A [reactiveValues()] object returned by [overlayServer()].
+#' @param plot A [ggplot2::ggplot()] object used for overlay alignment.
+#' @param xlim,ylim Vectors defining the coordinate limits for overlays.
+#'     Use `NA` to inherit axis limits from the plot panel.
+#' @param row,col Row and column of the facet panel (if applicable).
+#'
+#' @return The plot object, to be returned from the [shiny::renderPlot()] block.
+#'
+#' @examples
+#' \dontrun{
+#' output$my_plot <- renderPlot({
+#'     plot <- ggplot(df, aes(x, y)) + geom_line()
+#'     overlayBounds(ov, plot, xlim = c(0, 100), ylim = c(0, NA))
+#' })
+#' }
+#'
+#' @seealso [overlayServer()]
+#'
 #' @export
 overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L, col = 1L)
 {
@@ -234,11 +344,18 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
         by = rect$y + rect$h * (ylim[1] - rect$ymin) / (rect$ymax - rect$ymin)
         bh = rect$h * (ylim[2] - ylim[1]) / (rect$ymax - rect$ymin)
 
-        # Get width and height of target plot
+        # Get width and height of target plot, plus left offset of plot
         outputId = shiny::isolate(ov$outputId)
-        shinyjs::runjs(paste0('Shiny.setInputValue("overshiny_return", [$("#', outputId, '").width(), $("#', outputId, '").height()]);'))
+        shinyjs::runjs(paste0(
+            'var plot = $("#', outputId, '");\n',
+            'var disp = $("#', ovid("display", outputId), '");\n',
+            'Shiny.setInputValue("overshiny_return", [plot.width(), plot.height(), plot.offset().left]);'
+        ))
         img_width = input$overshiny_return[1];
         img_height = input$overshiny_return[2];
+        left_offset = input$overshiny_return[3];
+        cat("Left offset:", left_offset, "\n")###
+
         l = bx * img_width
         w = bw * img_width
         b = by * img_height
@@ -247,7 +364,7 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
         shiny::isolate({
             ov$bound_cx = xlim[1]
             ov$bound_cw = xlim[2] - xlim[1]
-            ov$bound_px = l
+            ov$bound_px = l + left_offset ###
             ov$bound_pw = w
             ov$py = rep(0, ov$n)
             ov$ph = h * (1 - 1:ov$n * ov$stagger)
@@ -260,6 +377,6 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
         stop("Unrecognised plot type")
     }
 
-    return (ov)
+    return (plot)
 }
 

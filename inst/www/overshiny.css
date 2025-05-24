@@ -1,0 +1,99 @@
+/* For draggable tokens */
+.overshiny-token {
+    position: relative;
+    background-color: #f8f5f0;
+    padding: 4px;
+    cursor: copy
+}
+
+.overshiny-token:hover {
+    background-color: #e8e5f0
+}
+
+/* Full display area containing plot for overlays */
+.overshiny-display {
+    position: relative !important;
+    margin: 0px !important;
+    border: none !important;
+    padding: 0px !important;
+    float: none !important
+}
+
+/* Bounding box for overlays */
+.overshiny-bounds {
+    position: absolute !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    left: 0px;
+    bottom: 0px
+}
+
+/* For overlay rectangles */
+.overshiny-rect {
+    position: absolute !important;
+    margin: 0px !important;
+    font-size: 8pt;
+    height: 100px;
+    width: 100px;
+    left: 0px;
+    bottom: 0px;
+}
+
+.overshiny-rect:hover {
+    cursor: grab
+}
+
+.overshiny-rect:active {
+    cursor: grabbing
+}
+
+/* Overlay dropdown button */
+.overshiny-clicker {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    cursor: pointer
+}
+
+.overshiny-clicker:hover {
+    color: white;
+}
+
+/* Text label on overlay */
+.overshiny-label {
+    position: absolute;
+    left: 22px;
+    top: 4px
+}
+
+/* For overlay settings dropdown */
+.overshiny-dropdown {
+    position: absolute;
+    background-color: white;
+    opacity: 0.75;
+    left: 0px;
+    top: 24px;
+    display: none;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+    z-index: 2000 /* shinyjqui assigns 1001 to z-index of handles */
+}
+
+/* For remove button in overlay settings */
+.overshiny-remove {
+    border-radius: 5px;
+    padding: 3px 7px
+}
+
+/* To not allow text highlighting or long-press callouts on iOS */
+.overshiny-noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
+}

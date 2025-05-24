@@ -1,16 +1,18 @@
 Package: overshiny
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Interactive Overlays in Shiny Plots
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Nick", "Davies",
+      email = "nicholas.davies@lshtm.ac.uk",
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: `overshiny` provides draggable and resizable rectangular elements 
+    that overlay plots in Shiny apps. This may be useful in applications where 
+    users need to define ranges, regions of interest, or intervals for further 
+    input or processing.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -28,3 +30,7 @@ Imports:
     shinyjs,
     shinyjqui,
     stringr
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
