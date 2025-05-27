@@ -70,13 +70,11 @@ function(input, output, session)
 
         # Read from interventions
         tref = as.numeric(params$date0);
-        for (i in 1:length(ov$active)) {
-            if (ov$active[i]) {
-                times = c(ov$cx0[i] - tref, ov$cx1[i] - tref)
-                req(opt$strength)
-                strength = opt$strength[i] / 100
-                dynamics[t %between% times, y := y * (1 - strength)]
-            }
+        for (i in which(ov$active)) {
+            times = c(ov$cx0[i] - tref, ov$cx1[i] - tref)
+            req(opt$strength)
+            strength = opt$strength[i] / 100
+            dynamics[t %between% times, y := y * (1 - strength)]
         }
         return (dynamics)
     });
