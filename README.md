@@ -137,14 +137,12 @@ server <- function(input, output, session)
 
         # Modify signal according to active overlays if logic is enabled
         if (isTRUE(input$enable_logic)) {
-            for (i in seq_along(ov$active)) {
-                if (ov$active[i]) {
-                    start <- as.Date(round(ov$cx0[i]), origin = "1970-01-01")
-                    end <- as.Date(round(ov$cx1[i]), origin = "1970-01-01")
-                    in_range <- date_seq >= start & date_seq <= end
-                    factor <- opt$strength[i] / 100
-                    y[in_range] <- y[in_range] * if (ov$label[i] == "Grow") (1 + factor) else (1 - factor)
-                }
+            for (i in which(ov$active)) {
+                start <- as.Date(round(ov$cx0[i]), origin = "1970-01-01")
+                end <- as.Date(round(ov$cx1[i]), origin = "1970-01-01")
+                in_range <- date_seq >= start & date_seq <= end
+                factor <- opt$strength[i] / 100
+                y[in_range] <- y[in_range] * if (ov$label[i] == "Grow") (1 + factor) else (1 - factor)
             }
         }
 
