@@ -1,4 +1,4 @@
-#' Interactive overlays in Shiny plots
+#' Interactive overlays on Shiny plots
 #'
 #' `overshiny` provides draggable and resizable rectangular elements that
 #' overlay plots in Shiny apps. This may be useful in applications where users

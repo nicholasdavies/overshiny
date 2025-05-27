@@ -1,4 +1,4 @@
-# overshiny: Interactive overlays in Shiny plots
+# overshiny: Interactive overlays on Shiny plots
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/nicholasdavies/overshiny/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nicholasdavies/overshiny/actions/workflows/R-CMD-check.yaml)

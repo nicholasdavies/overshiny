@@ -1,6 +1,6 @@
 Package: overshiny
 Type: Package
-Title: Interactive Overlays in Shiny Plots
+Title: Interactive Overlays on Shiny Plots
 Version: 0.1.0
 Authors@R: c(
     person(
