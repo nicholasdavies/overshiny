@@ -9,25 +9,28 @@ overlayBounds(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L, col = 1L)
 \arguments{
 \item{ov}{A \code{\link[=reactiveValues]{reactiveValues()}} object returned by \code{\link[=overlayServer]{overlayServer()}}.}
 
-\item{plot}{A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object used for overlay alignment.}
+\item{plot}{A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object used for overlay alignment, or the
+character string \code{"base"} if you are using base R plotting.}
 
 \item{xlim, ylim}{Vectors defining the coordinate limits for overlays.
 Use \code{NA} to inherit axis limits from the plot panel.}
 
-\item{row, col}{Row and column of the facet panel (if applicable).}
+\item{row, col}{Row and column of the facet panel (if applicable). This only
+works with ggplot2 plots; base R plots with multiple panels are not
+supported.}
 }
 \value{
-The plot object, to be returned from the \code{\link[shiny:renderPlot]{shiny::renderPlot()}} block.
+The ggplot object (for ggplot2) or \code{NULL} (for base R plotting), to
+be returned from the \code{\link[shiny:renderPlot]{shiny::renderPlot()}} block.
 }
 \description{
 Sets the pixel and coordinate bounds of the overlay area based on a
-\code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object. This ensures that overlays are positioned
-correctly in both visual and coordinate space. Currently only \code{ggplot2}
-plots are supported.
+\code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object or base R plot. This ensures that overlays are
+positioned correctly in both visual and coordinate space.
 }
 \details{
-Call this function within \code{\link[shiny:renderPlot]{shiny::renderPlot()}}, before returning the plot
-object.
+Call this function within \code{\link[shiny:renderPlot]{shiny::renderPlot()}}, before returning the
+ggplot object (if using ggplot2) or \code{NULL} (if using base R plotting).
 }
 \examples{
 \dontrun{

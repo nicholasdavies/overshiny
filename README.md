@@ -15,7 +15,6 @@ x axis of the plot.
 `overshiny` is under active development. There are some missing features.
 
 Missing features:
-- Doesn't handle R base plots yet.
 - Doesn't handle window resizing or plot resizing very well.
 - Some parts of the `ov` object returned by `overlayServer()` respond to being 
 changed, and some don't, and this is neither well-documented nor consistent.
