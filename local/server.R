@@ -1,10 +1,41 @@
 # covidm shiny app: server
 
+Run = function(N, I0, beta, delta, gamma, t1)
+{
+    set.seed(12345)
+    fx = function(K, lambda) {
+        # rbinom(1, K, 1 - exp(-lambda))
+        K * (1 - exp(-lambda))
+    }
+
+    dt = data.table(time = 0:t1, S = N - I0, E = I0, I = 0, R = 0)
+    for (t in 1:t1) {
+        St = dt[time == t - 1, S]
+        Et = dt[time == t - 1, E]
+        It = dt[time == t - 1, I]
+        Rt = dt[time == t - 1, R]
+        SE = fx(St, beta[t] * It/N)
+        EI = fx(Et, delta)
+        IR = fx(It, gamma)
+        RS = fx(Rt, 0.02)
+
+        St = St - SE + RS
+        Et = Et + SE - EI
+        It = It + EI - IR
+        Rt = Rt + IR - RS
+
+        dt[time == t, S := St]
+        dt[time == t, E := Et]
+        dt[time == t, I := It]
+        dt[time == t, R := Rt]
+    }
+    return (dt[])
+}
+
 function(input, output, session)
 {
     # ---------- SET UP ----------
-    ov = overlayServer("plot", 8, width = 56,
-        colours = heat.colors, opacity = 0.25, icon = icon("play"))
+    ov = overlayServer("plot", 8, width = 56, opacity = 0.25)
     opt = reactiveValues(
         type = rep(1, 8),
         strength = rep(50, 8)
@@ -57,6 +88,7 @@ function(input, output, session)
         )
         dynamics[, date := params$date0 + t];
         dynamics[, y := 150 + 100 * sin(t / 50)];
+        dynamics[, R0 := y / 100]
         return (dynamics)
     });
 
@@ -76,6 +108,7 @@ function(input, output, session)
             strength = opt$strength[i] / 100
             dynamics[t %between% times, y := y * (1 - strength)]
         }
+        dynamics[, R0 := y / 100]
         return (dynamics)
     });
 
@@ -85,34 +118,31 @@ function(input, output, session)
         dynU = unmitigated();
         dynM = mitigated();
 
-        if (input$display_tabs == "cases") {
+        r0 = dynM
+        trace = Run(1000, 2, r0[, R0] * 0.4, 0.5, 0.2, 365)
+
+        if (input$display_tabs == "transmission") {
             ov$show = TRUE
-            plot = ggplot() +
-                geom_line(data = dynU, aes(x = date, y = y), colour = "#afc6e9") +
-                geom_line(data = dynM, aes(x = date, y = y), colour = "#0044aa") +
-                ylim(0, NA) +
-                labs(x = NULL, y = "Cases")
-        } else if (input$display_tabs == "health") {
+            plot = ggplot(r0) +
+                geom_line(aes(x = date, y = R0), colour = "#af4433") +
+                ylim(0, 2) +
+                labs(x = NULL, y = "Basic reproduction number")
+
+            overlayBounds(ov, plot,
+                xlim = c(params$date0, params$date0 + params$time1),
+                ylim = c(0, NA))
+
+            return (plot)
+        } else if (input$display_tabs == "cases") {
             ov$show = TRUE
-            plot = ggplot() +
-                geom_line(data = dynU, aes(x = date, y = y), colour = "#afc6e9") +
-                geom_line(data = dynM, aes(x = date, y = y), colour = "#0044aa") +
-                ylim(0, NA) +
-                labs(x = NULL, y = "Health\nHealth\nHealth")
-        } else if (input$display_tabs == "credits") {
-            ov$show = FALSE
-            plot = ggplot() +
-                geom_label(data = dynU, aes(x = date, y = y, label = "By CMMID")) +
-                geom_label(data = dynM, aes(x = date, y = y, label = "By CMMID")) +
-                ylim(0, NA) +
-                labs(x = NULL, y = NULL)
+            plot(x = params$date0 + trace$time, y = trace$I, type = "l", col = "#0044aa")
+
+            overlayBounds(ov, "base",
+                xlim = c(params$date0, params$date0 + params$time1),
+                ylim = c(0, NA))
+
+            return (NULL)
         }
-
-        overlayBounds(ov, plot,
-            xlim = c(params$date0, params$date0 + params$time1),
-            ylim = c(0, NA))
-
-        return (plot)
     })
 }
 

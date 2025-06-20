@@ -45,9 +45,8 @@ fluidPage(theme = shinytheme("sandstone"),
     div(style = "max-width: 800px; min-width: 800px; margin: 0 auto; float: none; padding: 10px; border-radius: 20px 10px 10px 10px; border: 1px solid #dddddd; position:relative",
         # Display tabs
         tabsetPanel(id = "display_tabs",
-            tabPanel(value = "cases", title = iconTab("tab_cases", "Cases", "head-side-cough")),
-            tabPanel(value = "health", title = iconTab("tab_health", "Health", "star-of-life")),
-            tabPanel(value = "credits", title = iconTab("tab_credits", "Credits", "user-tag")),
+            tabPanel(value = "transmission", title = iconTab("tab_cases", "Transmission", "head-side-cough")),
+            tabPanel(value = "cases", title = iconTab("tab_health", "Cases", "star-of-life"))
         ),
         div(style = "padding: 10px", overlayPlotOutput("plot", width = 760, height = 400))
     ),
