@@ -13,6 +13,7 @@ overlayServer(
   opacity = 0.25,
   icon = shiny::icon("gear"),
   stagger = 0.045,
+  style = list(),
   debug = FALSE
 )
 }
@@ -40,43 +41,65 @@ opacity here as a fourth channel; use the \code{opacity} argument instead.}
 \item{stagger}{Vertical offset between stacked overlays, as a proportion of
 height.}
 
+\item{style}{Named list of character vectors with additional CSS styling
+attributes for the overlays. If an element is named "background-color"
+then this will override the \code{colours} and \code{opacity} arguments. Vectors
+are recycled to length \code{nrect}.}
+
 \item{debug}{If \code{TRUE}, prints changes to input values to the console for
 debugging purposes.}
 }
 \value{
 A \code{\link[shiny:reactiveValues]{shiny::reactiveValues()}} object with the following named fields:
 \describe{
-\item{n}{Number of overlays.}
+\item{n}{Number of overlays (read-only).}
 \item{active}{Logical vector of length \code{n}; indicates which overlays are active.}
-\item{show}{Logical; controls whether overlays are visible.}
+\item{show}{Logical vector; controls whether overlays are visible.}
 \item{editing}{Index of the overlay currently being edited via the
-dropdown menu (if any; \code{NA} otherwise).}
-\item{last}{Index of the most recently added overlay.}
+dropdown menu, if any; \code{NA} otherwise (read-only).}
+\item{last}{Index of the most recently added overlay (read-only).}
 \item{snap}{Coordinate snapping function.}
-\item{px, pw}{Overlay x-position and width in pixels.}
-\item{py, ph}{Overlay y-position and height in pixels.}
-\item{cx0, cx1}{Overlay x-bounds in plot coordinates.}
+\item{px, pw}{Numeric vector; overlay x-position and width in pixels (see note).}
+\item{py, ph}{Numeric vector; overlay y-position and height in pixels (read-only).}
+\item{cx0, cx1}{Numeric vector; overlay x-bounds in plot coordinates (see note).}
 \item{label}{Character vector of labels shown at the top of each overlay.}
-\item{outputId}{The output ID of the plot display area.}
-\item{bound_cx, bound_cw}{x-position and width of the bounding area in plot coordinates.}
-\item{bound_px, bound_pw}{x-position and width of the bounding area in pixels.}
-\item{stagger}{Amount of vertical staggering (as proportion of height).}
-\item{update_cx(i)}{Function to update \code{cx0}/\code{cx1} from \code{px}/\code{pw} for overlay \code{i}.}
-\item{update_px()}{Function to update \code{px}/\code{pw} from \code{cx0}/\code{cx1} for all overlays.}
+\item{outputId}{The output ID of the plot display area (read-only).}
+\item{bound_cx, bound_cw}{x-position and width of the bounding area in plot coordinates (read-only).}
+\item{bound_px, bound_pw}{x-position and width of the bounding area in pixels (read-only).}
+\item{bound_py, bound_ph}{y-position and height of the bounding area in pixels (read-only).}
+\item{stagger}{Amount of vertical staggering, as proportion of height.}
+\item{style}{Named list of character vectors; additional styling for rectangular overlays.}
+\item{update_cx(i)}{Function to update \code{cx0}/\code{cx1} from \code{px}/\code{pw} for overlays \code{i} (see note).}
+\item{update_px(i)}{Function to update \code{px}/\code{pw} from \code{cx0}/\code{cx1} for overlays \code{i} (see note).}
 }
+
+Note: Fields marked "read-only" above should not be changed. Other fields can
+be changed in your reactive code and this will modify the overlays and their
+properties. The fields \code{px} and \code{pw} which specify the pixel coordinates of
+each overlay can be modified, but any modifications should be placed in a
+\code{\link[shiny:isolate]{shiny::isolate()}} call, with a call to \code{ov$update_cx(i)} at the end to
+update \code{cx0} and \code{cx1} and apply snapping. Similarly, the fields
+\code{cx0} and \code{cx1} which specify the plot coordinates of each overlay can be
+modified, but modifications should be placed in a \code{\link[shiny:isolate]{shiny::isolate()}} call
+with a call to \code{ov$update_px(i)} at the end to update \code{px} and \code{pw}
+and apply snapping. The \code{i} parameter to these functions can be left out
+to apply changes to all overlays, or you can pass in the indices of just
+the overlay(s) to be updated.
 }
 \description{
 This function sets up server-side infrastructure to support draggable and
 resizable overlays on a plot. This may be useful in applications where users
-need to define ranges, regions of interest, or intervals for further input
-or processing. Currently, the overlays are only designed to move along the
-x axis of the plot.
+need to define regions on the plot for further input or processing.
+Currently, the overlays are only designed to move along the x axis of the
+plot.
 }
 \details{
 Call this function once from your server code to initialise a set of overlay
 rectangles for a specific plot. It creates reactive handlers for move,
 resize, and dropdown menu actions, and allows adding new overlays by
-dragging an \code{\link[=overlayToken]{overlayToken()}} onto the plot.
+dragging an \code{\link[=overlayToken]{overlayToken()}} onto the plot. The function returns a
+\code{\link[shiny:reactiveValues]{shiny::reactiveValues()}} object which you should keep for further use; in
+the examples and documentation, this object is typically called \code{ov}.
 
 This function also defines a dynamic output UI slot with ID
 \code{paste0(outputId, "_menu")}, which can be rendered using \code{\link[shiny:renderUI]{shiny::renderUI()}}.
@@ -87,20 +110,19 @@ labels or numeric parameters tied to that overlay.
 If you provide a coordinate snapping function (\code{snap} argument), it should
 have the signature \verb{function(ov, i)} where \code{ov} is the
 \code{\link[shiny:reactiveValues]{shiny::reactiveValues()}} object defining the overlays and their settings,
-and \code{i} is the set of indices for the rectangles to be updated. The
-intention is that you should change the values of \code{ov$cx0[i]} and
-\code{ov$cx1[i]}; the pixel coordinates of the overlays will then be updated
-automatically after the snapping function returns. You should make sure that
-all \code{ov$cx0[i]} and \code{ov$cx1[i]} are within the coordinate bounds defined by
-the plot, i.e. constrained by \code{ov$bound_cx} and \code{ov$bound_cw}, when the
-function returns. This means, for example, if you are "rounding down"
-\code{ov$cx0[i]} to some nearest multiple of a number, you should make sure it
-doesn't become less than \code{ov$bound_cx}. Finally, the snapping function will
-get triggered when the x axis range of the plot changes, so it may be a good
-idea to provide one if the user might place an overlay onto the plot, but
-then change the x axis range of the plot such that the overlay is no longer
-visible. You can detect this by verifying whether the overlay rectangles are
-"out of bounds" at the top of your snapping function. See example below.
+and \code{i} is the set of indices for the rectangles to be updated. When the
+position of any of the overlays is changed, the snapping function will be
+applied. In this function, you should make sure that all \code{ov$cx0[i]} and
+\code{ov$cx1[i]} are within the coordinate bounds defined by the plot, i.e.
+constrained by \code{ov$bound_cx} and \code{ov$bound_cw}, when the function returns.
+This means, for example, if you are "rounding down" \code{ov$cx0[i]} to some
+nearest multiple of a number, you should make sure it doesn't become less
+than \code{ov$bound_cx}. Finally, the snapping function will get triggered when
+the x axis range of the plot changes, so it may be a good idea to provide
+one if the user might place an overlay onto the plot, but then change the x
+axis range of the plot such that the overlay is no longer visible. You can
+detect this by verifying whether the overlay rectangles are "out of bounds"
+at the top of your snapping function. See example below.
 }
 \examples{
 \dontrun{

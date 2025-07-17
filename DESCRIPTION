@@ -11,8 +11,7 @@ Authors@R: c(
   )
 Description: `overshiny` provides draggable and resizable rectangular elements 
     that overlay plots in Shiny apps. This may be useful in applications where 
-    users need to define ranges, regions of interest, or intervals for further 
-    input or processing.
+    users need to mark regions on the plot for further input or processing.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

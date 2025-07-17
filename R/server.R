@@ -2,14 +2,16 @@
 #'
 #' This function sets up server-side infrastructure to support draggable and
 #' resizable overlays on a plot. This may be useful in applications where users
-#' need to define ranges, regions of interest, or intervals for further input
-#' or processing. Currently, the overlays are only designed to move along the
-#' x axis of the plot.
+#' need to define regions on the plot for further input or processing.
+#' Currently, the overlays are only designed to move along the x axis of the
+#' plot.
 #'
 #' Call this function once from your server code to initialise a set of overlay
 #' rectangles for a specific plot. It creates reactive handlers for move,
 #' resize, and dropdown menu actions, and allows adding new overlays by
-#' dragging an [overlayToken()] onto the plot.
+#' dragging an [overlayToken()] onto the plot. The function returns a
+#' [shiny::reactiveValues()] object which you should keep for further use; in
+#' the examples and documentation, this object is typically called `ov`.
 #'
 #' This function also defines a dynamic output UI slot with ID
 #' `paste0(outputId, "_menu")`, which can be rendered using [shiny::renderUI()].
@@ -20,20 +22,19 @@
 #' If you provide a coordinate snapping function (`snap` argument), it should
 #' have the signature `function(ov, i)` where `ov` is the
 #' [shiny::reactiveValues()] object defining the overlays and their settings,
-#' and `i` is the set of indices for the rectangles to be updated. The
-#' intention is that you should change the values of `ov$cx0[i]` and
-#' `ov$cx1[i]`; the pixel coordinates of the overlays will then be updated
-#' automatically after the snapping function returns. You should make sure that
-#' all `ov$cx0[i]` and `ov$cx1[i]` are within the coordinate bounds defined by
-#' the plot, i.e. constrained by `ov$bound_cx` and `ov$bound_cw`, when the
-#' function returns. This means, for example, if you are "rounding down"
-#' `ov$cx0[i]` to some nearest multiple of a number, you should make sure it
-#' doesn't become less than `ov$bound_cx`. Finally, the snapping function will
-#' get triggered when the x axis range of the plot changes, so it may be a good
-#' idea to provide one if the user might place an overlay onto the plot, but
-#' then change the x axis range of the plot such that the overlay is no longer
-#' visible. You can detect this by verifying whether the overlay rectangles are
-#' "out of bounds" at the top of your snapping function. See example below.
+#' and `i` is the set of indices for the rectangles to be updated. When the
+#' position of any of the overlays is changed, the snapping function will be
+#' applied. In this function, you should make sure that all `ov$cx0[i]` and
+#' `ov$cx1[i]` are within the coordinate bounds defined by the plot, i.e.
+#' constrained by `ov$bound_cx` and `ov$bound_cw`, when the function returns.
+#' This means, for example, if you are "rounding down" `ov$cx0[i]` to some
+#' nearest multiple of a number, you should make sure it doesn't become less
+#' than `ov$bound_cx`. Finally, the snapping function will get triggered when
+#' the x axis range of the plot changes, so it may be a good idea to provide
+#' one if the user might place an overlay onto the plot, but then change the x
+#' axis range of the plot such that the overlay is no longer visible. You can
+#' detect this by verifying whether the overlay rectangles are "out of bounds"
+#' at the top of your snapping function. See example below.
 #'
 #' @param outputId The ID of the plot output (as used in [overlayPlotOutput()]).
 #' @param nrect Number of overlay rectangles to support.
@@ -50,29 +51,48 @@
 #' @param icon A Shiny icon to show the dropdown menu.
 #' @param stagger Vertical offset between stacked overlays, as a proportion of
 #'     height.
+#' @param style Named list of character vectors with additional CSS styling
+#'     attributes for the overlays. If an element is named "background-color"
+#'     then this will override the `colours` and `opacity` arguments. Vectors
+#'     are recycled to length `nrect`.
 #' @param debug If `TRUE`, prints changes to input values to the console for
 #'     debugging purposes.
 #'
 #' @return A [shiny::reactiveValues()] object with the following named fields:
 #' \describe{
-#'   \item{n}{Number of overlays.}
+#'   \item{n}{Number of overlays (read-only).}
 #'   \item{active}{Logical vector of length `n`; indicates which overlays are active.}
-#'   \item{show}{Logical; controls whether overlays are visible.}
+#'   \item{show}{Logical vector; controls whether overlays are visible.}
 #'   \item{editing}{Index of the overlay currently being edited via the
-#'       dropdown menu (if any; `NA` otherwise).}
-#'   \item{last}{Index of the most recently added overlay.}
+#'       dropdown menu, if any; `NA` otherwise (read-only).}
+#'   \item{last}{Index of the most recently added overlay (read-only).}
 #'   \item{snap}{Coordinate snapping function.}
-#'   \item{px, pw}{Overlay x-position and width in pixels.}
-#'   \item{py, ph}{Overlay y-position and height in pixels.}
-#'   \item{cx0, cx1}{Overlay x-bounds in plot coordinates.}
+#'   \item{px, pw}{Numeric vector; overlay x-position and width in pixels (see note).}
+#'   \item{py, ph}{Numeric vector; overlay y-position and height in pixels (read-only).}
+#'   \item{cx0, cx1}{Numeric vector; overlay x-bounds in plot coordinates (see note).}
 #'   \item{label}{Character vector of labels shown at the top of each overlay.}
-#'   \item{outputId}{The output ID of the plot display area.}
-#'   \item{bound_cx, bound_cw}{x-position and width of the bounding area in plot coordinates.}
-#'   \item{bound_px, bound_pw}{x-position and width of the bounding area in pixels.}
-#'   \item{stagger}{Amount of vertical staggering (as proportion of height).}
-#'   \item{update_cx(i)}{Function to update `cx0`/`cx1` from `px`/`pw` for overlay `i`.}
-#'   \item{update_px()}{Function to update `px`/`pw` from `cx0`/`cx1` for all overlays.}
+#'   \item{outputId}{The output ID of the plot display area (read-only).}
+#'   \item{bound_cx, bound_cw}{x-position and width of the bounding area in plot coordinates (read-only).}
+#'   \item{bound_px, bound_pw}{x-position and width of the bounding area in pixels (read-only).}
+#'   \item{bound_py, bound_ph}{y-position and height of the bounding area in pixels (read-only).}
+#'   \item{stagger}{Amount of vertical staggering, as proportion of height.}
+#'   \item{style}{Named list of character vectors; additional styling for rectangular overlays.}
+#'   \item{update_cx(i)}{Function to update `cx0`/`cx1` from `px`/`pw` for overlays `i` (see note).}
+#'   \item{update_px(i)}{Function to update `px`/`pw` from `cx0`/`cx1` for overlays `i` (see note).}
 #' }
+#'
+#' Note: Fields marked "read-only" above should not be changed. Other fields can
+#' be changed in your reactive code and this will modify the overlays and their
+#' properties. The fields `px` and `pw` which specify the pixel coordinates of
+#' each overlay can be modified, but any modifications should be placed in a
+#' [shiny::isolate()] call, with a call to `ov$update_cx(i)` at the end to
+#' update `cx0` and `cx1` and apply snapping. Similarly, the fields
+#' `cx0` and `cx1` which specify the plot coordinates of each overlay can be
+#' modified, but modifications should be placed in a [shiny::isolate()] call
+#' with a call to `ov$update_px(i)` at the end to update `px` and `pw`
+#' and apply snapping. The `i` parameter to these functions can be left out
+#' to apply changes to all overlays, or you can pass in the indices of just
+#' the overlay(s) to be updated.
 #'
 #' @examples
 #' \dontrun{
@@ -112,7 +132,7 @@
 #' @export
 overlayServer = function(outputId, nrect, width = NULL, snap = "none",
     colours = overlayColours, opacity = 0.25, icon = shiny::icon("gear"),
-    stagger = 0.045, debug = FALSE)
+    stagger = 0.045, style = list(), debug = FALSE)
 {
     session = shiny::getDefaultReactiveDomain()
     input = session$input
@@ -190,7 +210,10 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
         bound_cw  = 0,              # width of bounds in coords (set by overlayBounds)
         bound_px  = 0,              # x-pos of bounds in pixels (set by overlayBounds)
         bound_pw  = 0,              # width of bounds in pixels (set by overlayBounds)
-        stagger   = stagger         # how much to stagger down each overlay
+        bound_py  = 0,              # y-pos of bounds in pixels (set by overlayBounds)
+        bound_ph  = 0,              # height of bounds in pixels (set by overlayBounds)
+        stagger   = stagger,        # how much to stagger down each overlay
+        style     = style           # additional styling options
     );
 
     # Set cx0 and cx1 of overlay i from px and pw
@@ -232,13 +255,27 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
         }
     })
 
+    # Make overlays respond to ov$style
+    shiny::observe({
+        for (i in seq_len(ov$n)) {
+            attributes = lapply(ov$style, function(x) x[[(i - 1) %% length(x) + 1]])
+            do.call(setcss, c(list(ovid("overlay", outputId, i)), attributes))
+        }
+    })
+
+    # Make overlays respond to ov$stagger
+    shiny::observeEvent(ov$stagger, {
+        ov$ph = ov$bound_ph * (1 - 1:ov$n * ov$stagger)
+        ov$update_px()
+    })
+
     # Close all dropdowns and their contents
     clear_dropdowns = function() {
         setcss(ovmatch("dropdown", outputId), display = "none")
         shiny::removeUI(ovsel("menu"), immediate = TRUE)
     }
 
-    # Observe move, resize, dropdown, remove, defocus, debug events
+    # Observe move, resize, dropdown, remove, defocus, plot_size, debug events
     shiny::observeEvent(input$overshiny_event, {
         # Extract rectangle id
         i = input$overshiny_event$id
@@ -420,6 +457,8 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
         ov$bound_cw = xlim[2] - xlim[1]
         ov$bound_px = l + left_offset
         ov$bound_pw = w
+        ov$bound_py = b
+        ov$bound_ph = h
         ov$py = rep(0, ov$n)
         ov$ph = h * (1 - 1:ov$n * ov$stagger)
         ov$update_px() # in case bounds have changed

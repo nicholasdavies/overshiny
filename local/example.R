@@ -17,6 +17,8 @@ ui <- fluidPage(
             # Control whether overlays are displayed and whether they alter the plot
             checkboxInput("show_overlays", "Show overlays", value = TRUE),
             checkboxInput("enable_logic", "Enable overlay logic", value = TRUE),
+            checkboxInput("enable_snap", "Use snapping", value = TRUE),
+            checkboxInput("stagger", "Stagger overlays", value = TRUE),
             tags$hr(),
 
             # Select date range for the plot
@@ -44,12 +46,13 @@ server <- function(input, output, session)
 # Example of a valid snapping function: snap to nearest round number and
 # make sure the overlay is at least 10 units wide.
 mysnap <- function(ov, i) {
-    # remove any "out of bounds" overlays
+    # remove any "out of bounds" overlays with a tolerance of 1 pixel
+    tol <- ov$bound_cw / ov$bound_pw
     oob <- seq_len(ov$n) %in% i &
-        (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
+        (ov$cx0 < ov$bound_cx - tol | ov$cx1 > ov$bound_cx + ov$bound_cw + tol)
     ov$active[oob] <- FALSE
 
-    # adjust position and with
+    # adjust position and width
     widths <- pmax(10, round(ov$cx1[i] - ov$cx0[i]))
     ov$cx0[i] <- pmax(round(ov$bound_cx),
         pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
@@ -57,7 +60,8 @@ mysnap <- function(ov, i) {
 }
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56, snap = mysnap) # 56 days = 8 weeks default width
+    ov <- overlayServer("plot", 8, width = 56, snap = mysnap, # 56 days = 8 weeks default width
+        style = list(border = "1px dotted grey"))
 
     # Reactive values to store custom per-overlay settings
     opt <- reactiveValues(
@@ -68,6 +72,16 @@ mysnap <- function(ov, i) {
     # Toggle overlay visibility based on checkbox
     observe({
         ov$show <- isTRUE(input$show_overlays)
+    })
+
+    # Toggle snap
+    observe({
+        ov$snap <- ifelse(isTRUE(input$enable_snap), mysnap, "none")
+    })
+
+    # Toggle stagger
+    observe({
+        ov$stagger <- ifelse(isTRUE(input$stagger), 0.045, 0)
     })
 
     # --- OVERLAY DROPDOWN MENU ---

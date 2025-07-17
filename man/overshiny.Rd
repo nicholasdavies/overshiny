@@ -8,15 +8,15 @@
 \description{
 \code{overshiny} provides draggable and resizable rectangular elements that
 overlay plots in Shiny apps. This may be useful in applications where users
-need to define ranges, regions of interest, or intervals for further input
-or processing. Currently, the overlays are only designed to move along the
-x axis of the plot.
+need to define regions on the plot for further input or processing.
+Currently, the overlays are only designed to move along the x axis of the
+plot.
 }
 \details{
 The package exports a setup helper (\code{\link[=useOverlay]{useOverlay()}}),
 UI components (\code{\link[=overlayToken]{overlayToken()}}, \code{\link[=overlayPlotOutput]{overlayPlotOutput()}}),
 a server-side controller (\code{\link[=overlayServer]{overlayServer()}}), and a function for
-aligning overlays to a ggplot2 plot (\code{\link[=overlayBounds]{overlayBounds()}}).
+aligning overlays to a ggplot2 or base plot (\code{\link[=overlayBounds]{overlayBounds()}}).
 }
 \seealso{
 Useful links:

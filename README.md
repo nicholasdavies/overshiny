@@ -6,9 +6,8 @@
 
 `overshiny` provides draggable and resizable rectangular elements that
 overlay plots in Shiny apps. This may be useful in applications where users
-need to define ranges, regions of interest, or intervals for further input
-or processing. Currently, the overlays are only designed to move along the
-x axis of the plot.
+need to define regions on the plot for further input or processing. Currently, 
+the overlays are only designed to move along the x axis of the plot.
 
 ## Status
 
@@ -16,10 +15,6 @@ x axis of the plot.
 
 Missing features:
 - Doesn't handle window resizing or plot resizing very well.
-- Some parts of the `ov` object returned by `overlayServer()` respond to being 
-changed, and some don't, and this is neither well-documented nor consistent.
-- The interface (via `ov`) doesn't allow full customization, e.g. of overlay
-styling.
 - No simple functionality to add a new overlay (without using a draggable 
 overlay token)
 
