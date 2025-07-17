@@ -6,6 +6,7 @@ usethis::use_news_md()
 usethis::use_roxygen_md()
 usethis::use_package_doc()
 usethis::use_mit_license()
+usethis::use_cran_comments()
 devtools::document() # delete NAMESPACE before first time
 
 # Set up git
@@ -33,12 +34,14 @@ usethis::use_vignette("overshiny")
 # BUILD CYCLE
 devtools::document()
 devtools::build_vignettes()
+# devtools::build_readme()
+pkgdown::build_site()
 
 devtools::build(vignettes = TRUE)
 devtools::install(build_vignettes = TRUE)
 
 # RELEASE CYCLE
-
+devtools::check(remote = TRUE, manual = TRUE)
 
 # What else is missing from here?
 # Rcpp, testthat

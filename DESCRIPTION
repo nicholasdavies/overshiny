@@ -6,7 +6,7 @@ Authors@R: c(
     person(
       "Nick", "Davies",
       email = "nicholas.davies@lshtm.ac.uk",
-      role = c("aut", "cre")
+      role = c("aut", "cre", "cph")
     )
   )
 Description: `overshiny` provides draggable and resizable rectangular elements 
@@ -15,7 +15,7 @@ Description: `overshiny` provides draggable and resizable rectangular elements
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/nicholasdavies/overshiny
+URL: https://github.com/nicholasdavies/overshiny, https://nicholasdavies.github.io/overshiny/
 BugReports: https://github.com/nicholasdavies/overshiny/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

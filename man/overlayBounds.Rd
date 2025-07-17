@@ -7,7 +7,7 @@
 overlayBounds(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L, col = 1L)
 }
 \arguments{
-\item{ov}{A \code{\link[=reactiveValues]{reactiveValues()}} object returned by \code{\link[=overlayServer]{overlayServer()}}.}
+\item{ov}{A \code{\link[shiny:reactiveValues]{shiny::reactiveValues()}} object returned by \code{\link[=overlayServer]{overlayServer()}}.}
 
 \item{plot}{A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object used for overlay alignment, or the
 character string \code{"base"} if you are using base R plotting.}

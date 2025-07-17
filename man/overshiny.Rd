@@ -22,11 +22,12 @@ aligning overlays to a ggplot2 or base plot (\code{\link[=overlayBounds]{overlay
 Useful links:
 \itemize{
   \item \url{https://github.com/nicholasdavies/overshiny}
+  \item \url{https://nicholasdavies.github.io/overshiny/}
   \item Report bugs at \url{https://github.com/nicholasdavies/overshiny/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Nick Davies \email{nicholas.davies@lshtm.ac.uk}
+\strong{Maintainer}: Nick Davies \email{nicholas.davies@lshtm.ac.uk} [copyright holder]
 
 }

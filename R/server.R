@@ -379,7 +379,7 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
 #' Call this function within [shiny::renderPlot()], before returning the
 #' ggplot object (if using ggplot2) or `NULL` (if using base R plotting).
 #'
-#' @param ov A [reactiveValues()] object returned by [overlayServer()].
+#' @param ov A [shiny::reactiveValues()] object returned by [overlayServer()].
 #' @param plot A [ggplot2::ggplot()] object used for overlay alignment, or the
 #'     character string `"base"` if you are using base R plotting.
 #' @param xlim,ylim Vectors defining the coordinate limits for overlays.
