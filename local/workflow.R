@@ -42,6 +42,7 @@ devtools::install(build_vignettes = TRUE)
 
 # RELEASE CYCLE
 devtools::check(remote = TRUE, manual = TRUE)
+devtools::check_win_devel()
 
 # What else is missing from here?
 # Rcpp, testthat

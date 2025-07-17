@@ -14,6 +14,7 @@ the overlays are only designed to move along the x axis of the plot.
 `overshiny` is under active development. There are some missing features.
 
 Missing features:
+
 - Doesn't handle window resizing or plot resizing very well.
 - No simple functionality to add a new overlay (without using a draggable 
 overlay token)
