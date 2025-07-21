@@ -21,15 +21,13 @@ Render a \code{\link[shiny:renderPlot]{shiny::renderPlot()}} within an applicati
 overlays.
 }
 \examples{
-\dontrun{
-ui <- fluidPage(
+ui <- shiny::fluidPage(
     useOverlay(),
     overlayPlotOutput("my_plot", 640, 480)
     # further UI elements here . . .
 )
-}
 
 }
 \seealso{
-\code{\link[=overlayBounds]{overlayBounds()}}
+\code{\link[=overlayServer]{overlayServer()}}, for a complete example.
 }

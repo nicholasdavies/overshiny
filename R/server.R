@@ -95,10 +95,30 @@
 #' the overlay(s) to be updated.
 #'
 #' @examples
-#' \dontrun{
+#' # Example of a valid snapping function: snap to nearest round number and
+#' # make sure the overlay is at least 2 units wide.
+#' mysnap <- function(ov, i) {
+#'     # remove any "out of bounds" overlays
+#'     oob <- seq_len(ov$n) %in% i &
+#'         (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
+#'     ov$active[oob] <- FALSE
+#'
+#'     # adjust position and with
+#'     widths <- pmax(2, round(ov$cx1[i] - ov$cx0[i]))
+#'     ov$cx0[i] <- pmax(round(ov$bound_cx),
+#'         pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
+#'     ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
+#' }
+#'
+#' ui <- shiny::fluidPage(
+#'     useOverlay(),
+#'     overlayPlotOutput("my_plot", 640, 480),
+#'     overlayToken("add", "Raise")
+#'     # further UI elements here . . .
+#' )
+#'
 #' server <- function(input, output) {
-#'     ov <- overlayServer("my_plot", 4)
-#'     ov$label <- LETTERS[1:4]
+#'     ov <- overlayServer("my_plot", 4, 1, snap = mysnap)
 #'
 #'     output$my_plot_menu <- renderUI({
 #'         i <- req(ov$editing)
@@ -109,22 +129,18 @@
 #'         i <- req(ov$editing)
 #'         ov$label[i] <- input$label_input
 #'     })
+#'
+#'     output$my_plot <- shiny::renderPlot({
+#'         df <- data.frame(x = seq(0, 2 * pi, length.out = 200))
+#'         df$y <- sin(df$x) + 0.1 * sum(ov$active * (df$x > ov$cx0 & df$x < ov$cx1))
+#'         plot(df, type = "l")
+#'         overlayBounds(ov, "base")
+#'     })
+#'     # further server code here . . .
 #' }
 #'
-#' # Example of a valid snapping function: snap to nearest round number and
-#' # make sure the overlay is at least 10 units wide.
-#' mysnap <- function(ov, i) {
-#'     # remove any "out of bounds" overlays
-#'     oob <- seq_len(ov$n) %in% i &
-#'         (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
-#'     ov$active[oob] <- FALSE
-#'
-#'     # adjust position and with
-#'     widths <- pmax(10, round(ov$cx1[i] - ov$cx0[i]))
-#'     ov$cx0[i] <- pmax(round(ov$bound_cx),
-#'         pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
-#'     ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
-#' }
+#' if (interactive()) {
+#'     shiny::shinyApp(ui, server)
 #' }
 #'
 #' @seealso [overlayPlotOutput()], [overlayBounds()]
@@ -370,7 +386,7 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
     return (ov)
 }
 
-#' Align overlays with a ggplot2 plot
+#' Align overlays with a ggplot2 or base plot
 #'
 #' Sets the pixel and coordinate bounds of the overlay area based on a
 #' [ggplot2::ggplot()] object or base R plot. This ensures that overlays are
@@ -392,14 +408,16 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
 #' be returned from the [shiny::renderPlot()] block.
 #'
 #' @examples
-#' \dontrun{
-#' output$my_plot <- renderPlot({
-#'     plot <- ggplot(df, aes(x, y)) + geom_line()
-#'     overlayBounds(ov, plot, xlim = c(0, 100), ylim = c(0, NA))
-#' })
+#' server <- function(input, output) {
+#'     ov <- overlayServer("my_plot", 1, 1)
+#'     output$my_plot <- shiny::renderPlot({
+#'         plot(1:100, sin(1:100 * 0.1), type = "l")
+#'         overlayBounds(ov, "base", xlim = c(1, 100))
+#'     })
+#'     # further server code here . . .
 #' }
 #'
-#' @seealso [overlayServer()]
+#' @seealso [overlayServer()], for a complete example.
 #'
 #' @export
 overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L, col = 1L)
@@ -469,4 +487,3 @@ overlayBounds = function(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L,
 
     return (plot)
 }
-

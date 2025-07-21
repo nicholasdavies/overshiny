@@ -10,9 +10,8 @@
 #' @return Returns HTML that gets inserted into the `<head>` of your app.
 #'
 #' @examples
-#' \dontrun{
-#' ui <- fluidPage(
-#'     useOverlay(),
+#' ui <- shiny::fluidPage(
+#'     useOverlay()
 #'     # further UI elements here . . .
 #' )
 #'
@@ -20,8 +19,11 @@
 #'     # server code here . . .
 #' }
 #'
-#' shinyApp(ui, server)
+#' if (interactive()) {
+#'     shiny::shinyApp(ui, server)
 #' }
+#'
+#' @seealso [overlayServer()], for a complete example.
 #'
 #' @export
 useOverlay = function()
@@ -53,14 +55,14 @@ useOverlay = function()
 #' @return An overlay token input control that can be added to a UI definition.
 #'
 #' @examples
-#' \dontrun{
-#' ui <- fluidPage(
+#' ui <- shiny::fluidPage(
 #'     useOverlay(),
 #'     overlayToken("add", "Add new overlay", "Overlay"),
 #'     # The token's HTML id will be "overshiny_token_add"
-#'     tags$style(HTML("#overshiny_token_add { cursor: grab; }"))
+#'     shiny::tags$style(shiny::HTML("#overshiny_token_add { cursor: grab; }"))
 #' )
-#' }
+#'
+#' @seealso [overlayServer()], for a complete example.
 #'
 #' @export
 overlayToken = function(inputId, name, label = name)
@@ -137,15 +139,13 @@ overlayImageOutput = function(outputId, width, height)
 #' @return A plot output element that can be added to a UI definition.
 #'
 #' @examples
-#' \dontrun{
-#' ui <- fluidPage(
+#' ui <- shiny::fluidPage(
 #'     useOverlay(),
 #'     overlayPlotOutput("my_plot", 640, 480)
 #'     # further UI elements here . . .
 #' )
-#' }
 #'
-#' @seealso [overlayBounds()]
+#' @seealso [overlayServer()], for a complete example.
 #'
 #' @export
 overlayPlotOutput = function(outputId, width, height)

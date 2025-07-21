@@ -1,6 +1,6 @@
 Package: overshiny
 Type: Package
-Title: Interactive Overlays on Shiny Plots
+Title: Interactive Overlays on 'shiny' Plots
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -10,8 +10,8 @@ Authors@R: c(
     )
   )
 Description: Provides rectangular elements that can be dragged and resized over
-    plots in Shiny apps. This may be useful in applications where users need to 
-    mark regions on the plot for further input or processing.
+    plots in 'shiny' apps. This may be useful in applications where users need 
+    to mark regions on the plot for further input or processing.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -31,5 +31,7 @@ Imports:
     stringr
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
+Config/testthat/edition: 3

@@ -28,13 +28,14 @@ referencing the token programmatically (e.g. in CSS selectors or custom
 JavaScript), use the full prefixed ID (see examples).
 }
 \examples{
-\dontrun{
-ui <- fluidPage(
+ui <- shiny::fluidPage(
     useOverlay(),
     overlayToken("add", "Add new overlay", "Overlay"),
     # The token's HTML id will be "overshiny_token_add"
-    tags$style(HTML("#overshiny_token_add { cursor: grab; }"))
+    shiny::tags$style(shiny::HTML("#overshiny_token_add { cursor: grab; }"))
 )
-}
 
+}
+\seealso{
+\code{\link[=overlayServer]{overlayServer()}}, for a complete example.
 }

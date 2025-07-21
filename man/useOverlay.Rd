@@ -19,9 +19,8 @@ no ill effect. This also calls \code{\link[shinyjs:useShinyjs]{shinyjs::useShiny
 depends on \code{shinyjs}.
 }
 \examples{
-\dontrun{
-ui <- fluidPage(
-    useOverlay(),
+ui <- shiny::fluidPage(
+    useOverlay()
     # further UI elements here . . .
 )
 
@@ -29,7 +28,11 @@ server <- function(input, output) {
     # server code here . . .
 }
 
-shinyApp(ui, server)
+if (interactive()) {
+    shiny::shinyApp(ui, server)
 }
 
+}
+\seealso{
+\code{\link[=overlayServer]{overlayServer()}}, for a complete example.
 }

@@ -125,10 +125,30 @@ detect this by verifying whether the overlay rectangles are "out of bounds"
 at the top of your snapping function. See example below.
 }
 \examples{
-\dontrun{
+# Example of a valid snapping function: snap to nearest round number and
+# make sure the overlay is at least 2 units wide.
+mysnap <- function(ov, i) {
+    # remove any "out of bounds" overlays
+    oob <- seq_len(ov$n) \%in\% i &
+        (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
+    ov$active[oob] <- FALSE
+
+    # adjust position and with
+    widths <- pmax(2, round(ov$cx1[i] - ov$cx0[i]))
+    ov$cx0[i] <- pmax(round(ov$bound_cx),
+        pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
+    ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
+}
+
+ui <- shiny::fluidPage(
+    useOverlay(),
+    overlayPlotOutput("my_plot", 640, 480),
+    overlayToken("add", "Raise")
+    # further UI elements here . . .
+)
+
 server <- function(input, output) {
-    ov <- overlayServer("my_plot", 4)
-    ov$label <- LETTERS[1:4]
+    ov <- overlayServer("my_plot", 4, 1, snap = mysnap)
 
     output$my_plot_menu <- renderUI({
         i <- req(ov$editing)
@@ -139,22 +159,18 @@ server <- function(input, output) {
         i <- req(ov$editing)
         ov$label[i] <- input$label_input
     })
+
+    output$my_plot <- shiny::renderPlot({
+        df <- data.frame(x = seq(0, 2 * pi, length.out = 200))
+        df$y <- sin(df$x) + 0.1 * sum(ov$active * (df$x > ov$cx0 & df$x < ov$cx1))
+        plot(df, type = "l")
+        overlayBounds(ov, "base")
+    })
+    # further server code here . . .
 }
 
-# Example of a valid snapping function: snap to nearest round number and
-# make sure the overlay is at least 10 units wide.
-mysnap <- function(ov, i) {
-    # remove any "out of bounds" overlays
-    oob <- seq_len(ov$n) \%in\% i &
-        (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
-    ov$active[oob] <- FALSE
-
-    # adjust position and with
-    widths <- pmax(10, round(ov$cx1[i] - ov$cx0[i]))
-    ov$cx0[i] <- pmax(round(ov$bound_cx),
-        pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
-    ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
-}
+if (interactive()) {
+    shiny::shinyApp(ui, server)
 }
 
 }

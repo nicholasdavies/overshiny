@@ -2,7 +2,7 @@
 % Please edit documentation in R/server.R
 \name{overlayBounds}
 \alias{overlayBounds}
-\title{Align overlays with a ggplot2 plot}
+\title{Align overlays with a ggplot2 or base plot}
 \usage{
 overlayBounds(ov, plot, xlim = c(NA, NA), ylim = c(NA, NA), row = 1L, col = 1L)
 }
@@ -33,14 +33,16 @@ Call this function within \code{\link[shiny:renderPlot]{shiny::renderPlot()}}, b
 ggplot object (if using ggplot2) or \code{NULL} (if using base R plotting).
 }
 \examples{
-\dontrun{
-output$my_plot <- renderPlot({
-    plot <- ggplot(df, aes(x, y)) + geom_line()
-    overlayBounds(ov, plot, xlim = c(0, 100), ylim = c(0, NA))
-})
+server <- function(input, output) {
+    ov <- overlayServer("my_plot", 1, 1)
+    output$my_plot <- shiny::renderPlot({
+        plot(1:100, sin(1:100 * 0.1), type = "l")
+        overlayBounds(ov, "base", xlim = c(1, 100))
+    })
+    # further server code here . . .
 }
 
 }
 \seealso{
-\code{\link[=overlayServer]{overlayServer()}}
+\code{\link[=overlayServer]{overlayServer()}}, for a complete example.
 }
