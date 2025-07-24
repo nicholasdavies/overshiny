@@ -18,6 +18,9 @@ usethis::use_github_action()
 # Web site
 usethis::use_pkgdown_github_pages()
 
+# Testing
+usethis::use_testthat()
+
 # Add 'local' directory
 dir.create("./local")
 usethis::write_union("./.Rbuildignore", "^local$")
@@ -43,6 +46,19 @@ devtools::install(build_vignettes = TRUE)
 # RELEASE CYCLE
 devtools::check(remote = TRUE, manual = TRUE)
 devtools::check_win_devel()
+
+usethis::use_version('minor') # patch, minor, or major
+
+# CRAN
+devtools::submit_cran()
+
+# After accepted
+git push
+usethis::use_github_release()
+usethis::use_dev_version()
+git push
+Finish blog post, share on social media, etc.
+Add link to blog post in pkgdown news menu
 
 # What else is missing from here?
 # Rcpp, testthat
