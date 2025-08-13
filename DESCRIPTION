@@ -20,6 +20,7 @@ BugReports: https://github.com/nicholasdavies/overshiny/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
+    cowplot,
     ggplot2,
     graphics,
     grDevices,
@@ -28,8 +29,7 @@ Imports:
     shiny,
     shinyjs,
     shinyjqui,
-    stringr,
-    cowplot
+    stringr
 Suggests: 
     knitr,
     rmarkdown,

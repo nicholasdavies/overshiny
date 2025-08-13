@@ -21,7 +21,7 @@ panel_rects = function(plot)
     {
         leeway_mm = total_mm - sum(to_mm(lengths))
         null_length = sum(sapply(unclass(lengths),
-            function(x) if (x[[3]] == 5) x[[1]] else 0))
+            function(x) if (x[[3]] == 5L) x[[1]] else 0))
 
         unit_class = class(lengths)
         lengths = unclass(lengths)

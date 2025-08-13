@@ -28,7 +28,7 @@ usethis::write_union("./.Rbuildignore", "^local$")
 
 # ADDING ELEMENTS
 # Import package
-usethis::use_package("")
+usethis::use_package("cowplot")
 
 # Add vignette
 usethis::use_vignette("overshiny")
@@ -47,7 +47,7 @@ devtools::install(build_vignettes = TRUE)
 devtools::check(remote = TRUE, manual = TRUE)
 devtools::check_win_devel()
 
-usethis::use_version('minor') # patch, minor, or major
+usethis::use_version('patch') # patch, minor, or major
 
 # CRAN
 devtools::submit_cran()

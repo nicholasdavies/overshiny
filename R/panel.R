@@ -12,7 +12,7 @@ panel_rects_ggplot = function(plot)
     {
         leeway_mm = total_mm - sum(to_mm(lengths))
         null_length = sum(sapply(unclass(lengths),
-            function(x) if (x[[3]] == 5) x[[1]] else 0))
+            function(x) if (x[[3]] == 5L) x[[1]] else 0))
 
         unit_class = class(lengths)
         lengths = unclass(lengths)
@@ -105,4 +105,66 @@ panel_rects_base = function()
         xmin = usr[1], xmax = usr[2], ymin = usr[3], ymax = usr[4])
 
     return (data)
+}
+
+#' Adjust margins of a ggplot2 plot
+#'
+#' To avoid the overlay rectangles moving around when the plot margins change,
+#' you can use this function to set specific margins for your plot. You will
+#' probably want to specify a large enough margin so that the axes and legends
+#' don't go out of the plot area.
+#'
+#' Note that this only works with `ggplot2` plots. For base plots, you can set
+#' the margins using `par(plt = c(x1, x2, y1, y2))`. See [graphics::par()] for
+#' details.
+#'
+#' @param g A `ggplot2` plot.
+#' @param t,r,b,l Top, right, bottom, and left margins to set.
+#' @param unit Unit for the margins (see [grid::unit()] for permissible units).
+#'     The default, `"npc"`, refers to fractions of the overall plot area.
+#'
+#' @return A `ggplot2` plot with margins adjusted.
+#'
+#' @examples
+#' plot1 = ggplot2::ggplot(data.frame(x = rnorm(10), y = rnorm(10))) +
+#'     ggplot2::geom_point(ggplot2::aes(x, y))
+#' plot2 = remargin(plot1, 0.1, 0.1, 0.1, 0.1) # plot with 10% margins all around
+#'
+#' @export
+remargin = function(g, t, r, b, l, unit = "npc")
+{
+    to_npc = function(x) grid::convertUnit(x, "npc", valueOnly = TRUE)
+
+    t = to_npc(grid::unit(t, unit))
+    r = to_npc(grid::unit(r, unit))
+    b = to_npc(grid::unit(b, unit))
+    l = to_npc(grid::unit(l, unit))
+
+    # With a set of lengths (widths/heights) from a gtable, return lengths
+    # in normalised parent coordinates of the plot margins
+    margins = function(lengths, total_mm)
+    {
+        nulls = sapply(unclass(lengths), function(x) x[[3]] == 5L)
+        if (!any(nulls)) {
+            stop("Could not retrieve plot margins.")
+        }
+        first = which(nulls)[1]
+        last = which(nulls)[sum(nulls)]
+        length0 = sum(to_npc(lengths[1:(first - 1)]))
+        length1 = sum(to_npc(lengths[(last + 1):length(lengths)]))
+        return (c(length0, length1))
+    }
+
+    grob = cowplot::as_grob(g)
+    m_horz = margins(grob$widths)  # left, right
+    m_vert = margins(grob$heights) # top, bottom
+    W = length(grob$widths)
+    H = length(grob$heights)
+
+    grob$widths[[1]]  = grob$widths[[1]]  + (grid::unit(l, "npc") - grid::unit(m_horz[1], "npc"))
+    grob$widths[[W]]  = grob$widths[[W]]  + (grid::unit(r, "npc") - grid::unit(m_horz[2], "npc"))
+    grob$heights[[1]] = grob$heights[[1]] + (grid::unit(t, "npc") - grid::unit(m_vert[1], "npc"))
+    grob$heights[[W]] = grob$heights[[W]] + (grid::unit(b, "npc") - grid::unit(m_vert[2], "npc"))
+
+    cowplot::ggdraw(grob)
 }
