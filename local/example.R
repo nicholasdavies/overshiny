@@ -4,12 +4,6 @@ library(overshiny)
 
 # --- User interface ---
 ui <- fluidPage(
-    # Load overshiny
-    useOverlay(),
-
-    # Lighten the sidebar background
-    tags$head(tags$style(".well { background-color: white }")),
-
     titlePanel("Overlay demo"),
 
     sidebarLayout(

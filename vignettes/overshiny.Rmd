@@ -14,19 +14,22 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r}
+`overshiny` provides draggable and resizable rectangular elements that
+overlay plots in Shiny apps. This may be useful in applications where users
+need to define regions on the plot for further input or processing.
+
+Let's take a look at a simple user interface that includes two 
+`overlayToken()`s, which are small labels that can be dragged onto the plot to
+create new overlays, and an `overlayPlotOutput()`, which is a plot where the 
+overlays will appear:
+
+```{r, eval = FALSE}
 library(shiny)
 library(ggplot2)
 library(overshiny)
 
 # --- User interface ---
 ui <- fluidPage(
-    # Load overshiny
-    useOverlay(),
-
-    # Lighten the sidebar background
-    tags$head(tags$style(".well { background-color: white }")),
-
     titlePanel("Overlay demo"),
 
     sidebarLayout(
@@ -52,7 +55,15 @@ ui <- fluidPage(
         )
     )
 )
+```
 
+This sets up a sidebar layout, with controls on the left (including the overlay
+tokens) and a display area on the right, which includes the plot the overlays
+will be used with.
+
+Now let's put together our server function. We start by setting up the overlays:
+
+```{r, eval = FALSE}
 # --- App logic ---
 server <- function(input, output, session)
 {
@@ -71,7 +82,26 @@ server <- function(input, output, session)
     observe({
         ov$show <- isTRUE(input$show_overlays)
     })
+    
+```
 
+The call to `overlayServer()` initializes (up to) 8 overlays that we can use. 
+It also sets the default width of new overlays to 56, which is in plot 
+coordinates. We'll be plotting a time series, so this means 56 days (8 weeks).
+
+Then we create `opt`, a `reactiveValues()` object that we will use to store
+additional properties of the overlays. Here we're going to keep track of a
+"type" for each overlay ("Grow" or "Shrink") as well as a "strength" for
+each overlay (in percent).
+
+Finally, we start with some of the reactive logic of the overlays. We have a 
+checkbox in our UI to control whether the overlays are shown or not, and the
+call to `observe()` makes the overlays show or hide based on the value of
+this checkbox.
+
+Continuing on:
+
+```{r, eval = FALSE}
     # --- OVERLAY DROPDOWN MENU ---
 
     # Render dropdown menu when an overlay is being edited
@@ -84,6 +114,32 @@ server <- function(input, output, session)
         )
     })
 
+```
+
+Each overlay automatically has a dropdown menu for adjusting settings for the
+overlay. By default, this only includes a "remove" button that can be used to 
+remove the overlay. But we can add extra elements to these menus by using
+`renderUI()`.
+
+Since we created an `overlayPlotOutput()` with the output ID `"plot"`, 
+`overshiny` has also created a UI output slot named `"plot_menu"` which is used 
+to add extra elements to each overlay's dropdown menu. For our purposes, we'll
+include a `textOutput()` element which shows the date range for the overlay, a 
+`selectInput()` to choose between "Grow" and "Shrink" type overlays, and a 
+`sliderInput()` to choose the percentage "strength" associated with the overlay.
+
+The line `i <- req(ov$editing)` just gets the index (1 to 8) of the current
+overlay being edited. The call to `req()` ensures that the rest of the code
+in the `renderUI()` call won't be run unless there is an overlay currently
+being edited via its dropdown menu.
+
+Note that above, each overlay has the same elements in its dropdown menu, but
+we could choose to return different contents for the dropdown menu depending on 
+which overlay is being edited.
+
+Now let's fill in some extra logic around those dropdown menus.
+
+```{r, eval = FALSE}
     # Display date range for the currently edited overlay
     output$dates <- renderText({
         i <- req(ov$editing)
@@ -103,7 +159,18 @@ server <- function(input, output, session)
         opt$type[i] <- input$type
         ov$label[i] <- input$type
     })
+    
+```
 
+Above, we specify the "dates" label that will appear on the dropdown menus,
+and create some `observeEvent()`s that will update the `strength` and `type` 
+elements of the `opt` `reactiveValues()` object we created earlier based on
+what is done in the dropdown menu. We also change the label of the overlay 
+depending on what `type` is chosen from the menu.
+
+Now let's make some data to plot based on the overlays and their properties:
+
+```{r, eval = FALSE}
     # --- DATA PROCESSING BASED ON OVERLAY POSITION ---
 
     # Reactive dataset: oscillating signal modified by active overlays
@@ -125,6 +192,17 @@ server <- function(input, output, session)
         data.frame(date = date_seq, y = y)
     })
 
+```
+
+Above, we create a `reactive()` data.frame. We set up a sinusoidally-varying
+time series, then (if the "Enable overlay logic" checkbox is checked) we either
+"grow" or "shrink" this time series where it overlaps with each active overlay.
+We're using both the `ov` object returned by `overlayServer()` and our own
+`opt` object to do this.
+
+Finally, we render the time series:
+
+```{r, eval = FALSE}
     # --- RENDERING OF DATA ---
 
     # Render plot and align overlays to current axis limits
@@ -139,7 +217,16 @@ server <- function(input, output, session)
             ylim = c(0, NA))
     })
 }
+```
 
+This just creates a `ggplot()` plot of the time series, and includes a call to
+`overlayBounds()` at the end of the `renderPlot()` expression block to ensure
+the overlays are aligned properly. `overlayBounds()` itself returns the plot so
+this also returns our plot object to Shiny to be plotted.
+
+Now all that's left is to run the app:
+
+```{r, eval = FALSE}
 # --- Run app ---
 if (interactive()) {
     shinyApp(ui, server)
