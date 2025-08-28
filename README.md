@@ -22,7 +22,13 @@ overlay token)
 
 ## Installation
 
-You can install the development version of overshiny from [GitHub](https://github.com/) with:
+You can install the released version of overshiny from CRAN:
+
+``` r
+install.packages("overshiny")
+```
+
+Or, install the development version of overshiny from [GitHub](https://github.com/):
 
 ``` r
 # install.packages("devtools")
