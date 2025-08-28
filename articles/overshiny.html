@@ -60,6 +60,15 @@
 
     
     
+<p><code>overshiny</code> provides draggable and resizable rectangular
+elements that overlay plots in Shiny apps. This may be useful in
+applications where users need to define regions on the plot for further
+input or processing.</p>
+<p>Let’s take a look at a simple user interface that includes two
+<code><a href="../reference/overlayToken.html">overlayToken()</a></code>s, which are small labels that can be dragged
+onto the plot to create new overlays, and an
+<code><a href="../reference/overlayPlotOutput.html">overlayPlotOutput()</a></code>, which is a plot where the overlays
+will appear:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -67,12 +76,6 @@
 <span></span>
 <span><span class="co"># --- User interface ---</span></span>
 <span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
-<span>    <span class="co"># Load overshiny</span></span>
-<span>    <span class="fu"><a href="../reference/useOverlay.html">useOverlay</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span></span>
-<span>    <span class="co"># Lighten the sidebar background</span></span>
-<span>    <span class="va">tags</span><span class="op">$</span><span class="fu">head</span><span class="op">(</span><span class="va">tags</span><span class="op">$</span><span class="fu">style</span><span class="op">(</span><span class="st">".well { background-color: white }"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/titlePanel.html" class="external-link">titlePanel</a></span><span class="op">(</span><span class="st">"Overlay demo"</span><span class="op">)</span>,</span>
 <span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sidebarLayout.html" class="external-link">sidebarLayout</a></span><span class="op">(</span></span>
@@ -97,28 +100,46 @@
 <span>            <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># --- App logic ---</span></span>
-<span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span></span>
-<span><span class="op">{</span></span>
-<span>    <span class="co"># --- OVERLAY SETUP ---</span></span>
-<span></span>
-<span>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
-<span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/overlayServer.html">overlayServer</a></span><span class="op">(</span><span class="st">"plot"</span>, <span class="fl">8</span>, width <span class="op">=</span> <span class="fl">56</span><span class="op">)</span> <span class="co"># 56 days = 8 weeks default width</span></span>
-<span></span>
-<span>    <span class="co"># Reactive values to store custom per-overlay settings</span></span>
-<span>    <span class="va">opt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">reactiveValues</a></span><span class="op">(</span></span>
-<span>        type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Grow"</span>, <span class="fl">8</span><span class="op">)</span>,        <span class="co"># type of overlay action</span></span>
-<span>        strength <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">8</span><span class="op">)</span>         <span class="co"># strength as a percentage</span></span>
-<span>    <span class="op">)</span></span>
-<span></span>
-<span>    <span class="co"># Toggle overlay visibility based on checkbox</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>        <span class="va">ov</span><span class="op">$</span><span class="va">show</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">show_overlays</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="co"># --- OVERLAY DROPDOWN MENU ---</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>This sets up a sidebar layout, with controls on the left (including
+the overlay tokens) and a display area on the right, which includes the
+plot the overlays will be used with.</p>
+<p>Now let’s put together our server function. We start by setting up
+the overlays:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># --- App logic ---</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>{</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    <span class="co"># --- OVERLAY SETUP ---</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"plot"</span>, <span class="dv">8</span>, <span class="at">width =</span> <span class="dv">56</span>) <span class="co"># 56 days = 8 weeks default width</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    <span class="co"># Reactive values to store custom per-overlay settings</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    opt <span class="ot">&lt;-</span> <span class="fu">reactiveValues</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>        <span class="at">type =</span> <span class="fu">rep</span>(<span class="st">"Grow"</span>, <span class="dv">8</span>),        <span class="co"># type of overlay action</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>        <span class="at">strength =</span> <span class="fu">rep</span>(<span class="dv">50</span>, <span class="dv">8</span>)         <span class="co"># strength as a percentage</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    )</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    <span class="co"># Toggle overlay visibility based on checkbox</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    <span class="fu">observe</span>({</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>        ov<span class="sc">$</span>show <span class="ot">&lt;-</span> <span class="fu">isTRUE</span>(input<span class="sc">$</span>show_overlays)</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>    })</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>    </span></code></pre></div>
+<p>The call to <code><a href="../reference/overlayServer.html">overlayServer()</a></code> initializes (up to) 8
+overlays that we can use. It also sets the default width of new overlays
+to 56, which is in plot coordinates. We’ll be plotting a time series, so
+this means 56 days (8 weeks).</p>
+<p>Then we create <code>opt</code>, a <code><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">reactiveValues()</a></code>
+object that we will use to store additional properties of the overlays.
+Here we’re going to keep track of a “type” for each overlay (“Grow” or
+“Shrink”) as well as a “strength” for each overlay (in percent).</p>
+<p>Finally, we start with some of the reactive logic of the overlays. We
+have a checkbox in our UI to control whether the overlays are shown or
+not, and the call to <code><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe()</a></code> makes the overlays show or
+hide based on the value of this checkbox.</p>
+<p>Continuing on:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>    <span class="co"># --- OVERLAY DROPDOWN MENU ---</span></span>
 <span></span>
 <span>    <span class="co"># Render dropdown menu when an overlay is being edited</span></span>
 <span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_menu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
@@ -128,9 +149,30 @@
 <span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">selectInput</a></span><span class="op">(</span><span class="st">"type"</span>, <span class="cn">NULL</span>, choices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grow"</span>, <span class="st">"Shrink"</span><span class="op">)</span>, selected <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="st">"strength"</span>, <span class="st">"Strength"</span>, min <span class="op">=</span> <span class="fl">0</span>, max <span class="op">=</span> <span class="fl">100</span>, value <span class="op">=</span> <span class="va">opt</span><span class="op">$</span><span class="va">strength</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="co"># Display date range for the currently edited overlay</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>Each overlay automatically has a dropdown menu for adjusting settings
+for the overlay. By default, this only includes a “remove” button that
+can be used to remove the overlay. But we can add extra elements to
+these menus by using <code><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI()</a></code>.</p>
+<p>Since we created an <code><a href="../reference/overlayPlotOutput.html">overlayPlotOutput()</a></code> with the output
+ID <code>"plot"</code>, <code>overshiny</code> has also created a UI
+output slot named <code>"plot_menu"</code> which is used to add extra
+elements to each overlay’s dropdown menu. For our purposes, we’ll
+include a <code><a href="https://rdrr.io/pkg/shiny/man/textOutput.html" class="external-link">textOutput()</a></code> element which shows the date range
+for the overlay, a <code><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">selectInput()</a></code> to choose between “Grow”
+and “Shrink” type overlays, and a <code><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput()</a></code> to choose
+the percentage “strength” associated with the overlay.</p>
+<p>The line <code>i &lt;- req(ov$editing)</code> just gets the index (1
+to 8) of the current overlay being edited. The call to
+<code><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req()</a></code> ensures that the rest of the code in the
+<code><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI()</a></code> call won’t be run unless there is an overlay
+currently being edited via its dropdown menu.</p>
+<p>Note that above, each overlay has the same elements in its dropdown
+menu, but we could choose to return different contents for the dropdown
+menu depending on which overlay is being edited.</p>
+<p>Now let’s fill in some extra logic around those dropdown menus.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>    <span class="co"># Display date range for the currently edited overlay</span></span>
 <span>    <span class="va">output</span><span class="op">$</span><span class="va">dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPrint.html" class="external-link">renderText</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">editing</span><span class="op">)</span></span>
 <span>        <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span>, origin <span class="op">=</span> <span class="st">"1970-01-01"</span><span class="op">)</span>, <span class="st">"%b %d"</span><span class="op">)</span></span>
@@ -149,8 +191,18 @@
 <span>        <span class="va">opt</span><span class="op">$</span><span class="va">type</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">type</span></span>
 <span>        <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">type</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="co"># --- DATA PROCESSING BASED ON OVERLAY POSITION ---</span></span>
+<span>    </span></code></pre></div>
+<p>Above, we specify the “dates” label that will appear on the dropdown
+menus, and create some <code><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent()</a></code>s that will update the
+<code>strength</code> and <code>type</code> elements of the
+<code>opt</code> <code><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">reactiveValues()</a></code> object we created earlier
+based on what is done in the dropdown menu. We also change the label of
+the overlay depending on what <code>type</code> is chosen from the
+menu.</p>
+<p>Now let’s make some data to plot based on the overlays and their
+properties:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>    <span class="co"># --- DATA PROCESSING BASED ON OVERLAY POSITION ---</span></span>
 <span></span>
 <span>    <span class="co"># Reactive dataset: oscillating signal modified by active overlays</span></span>
 <span>    <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span>
@@ -169,24 +221,36 @@
 <span>        <span class="op">}</span></span>
 <span></span>
 <span>        <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>date <span class="op">=</span> <span class="va">date_seq</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="co"># --- RENDERING OF DATA ---</span></span>
-<span></span>
-<span>    <span class="co"># Render plot and align overlays to current axis limits</span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Signal"</span><span class="op">)</span></span>
-<span></span>
-<span>        <span class="fu"><a href="../reference/overlayBounds.html">overlayBounds</a></span><span class="op">(</span><span class="va">ov</span>, <span class="va">plot</span>,</span>
-<span>            xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">)</span>,</span>
-<span>            ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># --- Run app ---</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>Above, we create a <code><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive()</a></code> data.frame. We set up a
+sinusoidally-varying time series, then (if the “Enable overlay logic”
+checkbox is checked) we either “grow” or “shrink” this time series where
+it overlaps with each active overlay. We’re using both the
+<code>ov</code> object returned by <code><a href="../reference/overlayServer.html">overlayServer()</a></code> and our
+own <code>opt</code> object to do this.</p>
+<p>Finally, we render the time series:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>    <span class="co"># --- RENDERING OF DATA ---</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>    <span class="co"># Render plot and align overlays to current axis limits</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>    output<span class="sc">$</span>plot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>        plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">data</span>()) <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>            <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>            <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>            <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Signal"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>        <span class="fu">overlayBounds</span>(ov, plot,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>            <span class="at">xlim =</span> <span class="fu">c</span>(input<span class="sc">$</span>date_range),</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>            <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>))</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>    })</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="er">}</span></span></code></pre></div>
+<p>This just creates a <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot()</a></code> plot of the time series,
+and includes a call to <code><a href="../reference/overlayBounds.html">overlayBounds()</a></code> at the end of the
+<code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code> expression block to ensure the overlays are
+aligned properly. <code><a href="../reference/overlayBounds.html">overlayBounds()</a></code> itself returns the plot
+so this also returns our plot object to Shiny to be plotted.</p>
+<p>Now all that’s left is to run the app:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># --- Run app ---</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>

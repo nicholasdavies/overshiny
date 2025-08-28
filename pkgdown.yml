@@ -3,7 +3,7 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   overshiny: overshiny.html
-last_built: 2025-08-25T13:03Z
+last_built: 2025-08-28T22:49Z
 urls:
   reference: https://nicholasdavies.github.io/overshiny/reference
   article: https://nicholasdavies.github.io/overshiny/articles
