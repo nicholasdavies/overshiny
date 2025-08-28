@@ -1,17 +1,18 @@
-#' Set up a Shiny app to use overshiny
+#' Manually set up a Shiny app to use overshiny
 #'
-#' Put [useOverlay()] in your Shiny app's UI to use `overshiny`'s interactive
-#' plot overlays.
+#' `overshiny` will set up automatically if you have an [overlayPlotOutput()]
+#' anywhere in your Shiny UI, which you probably do if you are using this
+#' package. But if you don't, you can set up `overshiny` by manually putting
+#' [useOverlay()] somewhere in your Shiny app's UI.
 #'
-#' This can go anywhere in your UI and it can be inserted multiple times with
-#' no ill effect. This also calls [shinyjs::useShinyjs()], as `overshiny`
-#' depends on `shinyjs`.
+#' This also calls [shinyjs::useShinyjs()], as `overshiny` depends on `shinyjs`.
 #'
-#' @return Returns HTML that gets inserted into the `<head>` of your app.
+#' @return Returns an HTML dependency that sets up your Shiny app to use
+#' `overshiny`.
 #'
 #' @examples
 #' ui <- shiny::fluidPage(
-#'     useOverlay()
+#'     useOverlay() # only needed if no overlayPlotOutput() elements below
 #'     # further UI elements here . . .
 #' )
 #'
@@ -28,11 +29,15 @@
 #' @export
 useOverlay = function()
 {
-    shiny::singleton(
-        htmltools::tags$head(
-            shinyjs::useShinyjs(),
-            htmltools::tags$link(rel = "stylesheet", type = "text/css", href = "overshiny/overshiny.css"),
-            overshiny_script
+    htmltools::tagList(
+        shinyjs::useShinyjs(),
+        htmltools::htmlDependency(
+            name = "overshiny",
+            version = utils::packageVersion("overshiny"),
+            src = "www/overshiny",
+            package = "overshiny",
+            script = "overshiny.js",
+            stylesheet = "overshiny.css"
         )
     )
 }
@@ -117,7 +122,8 @@ overlayDisplay = function(outputId, width, height, element)
         htmltools::div(id = ovid("bounds", outputId),
             class = "overshiny-bounds",
             style = paste0("width: ", width, "px; height: ", height, "px")
-        )
+        ),
+        useOverlay()
     )
 }
 

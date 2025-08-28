@@ -2,25 +2,26 @@
 % Please edit documentation in R/ui.R
 \name{useOverlay}
 \alias{useOverlay}
-\title{Set up a Shiny app to use overshiny}
+\title{Manually set up a Shiny app to use overshiny}
 \usage{
 useOverlay()
 }
 \value{
-Returns HTML that gets inserted into the \verb{<head>} of your app.
+Returns an HTML dependency that sets up your Shiny app to use
+\code{overshiny}.
 }
 \description{
-Put \code{\link[=useOverlay]{useOverlay()}} in your Shiny app's UI to use \code{overshiny}'s interactive
-plot overlays.
+\code{overshiny} will set up automatically if you have an \code{\link[=overlayPlotOutput]{overlayPlotOutput()}}
+anywhere in your Shiny UI, which you probably do if you are using this
+package. But if you don't, you can set up \code{overshiny} by manually putting
+\code{\link[=useOverlay]{useOverlay()}} somewhere in your Shiny app's UI.
 }
 \details{
-This can go anywhere in your UI and it can be inserted multiple times with
-no ill effect. This also calls \code{\link[shinyjs:useShinyjs]{shinyjs::useShinyjs()}}, as \code{overshiny}
-depends on \code{shinyjs}.
+This also calls \code{\link[shinyjs:useShinyjs]{shinyjs::useShinyjs()}}, as \code{overshiny} depends on \code{shinyjs}.
 }
 \examples{
 ui <- shiny::fluidPage(
-    useOverlay()
+    useOverlay() # only needed if no overlayPlotOutput() elements below
     # further UI elements here . . .
 )
 
