@@ -48,12 +48,12 @@ useOverlay = function()
 #' to create a new overlay.
 #'
 #' Note that the DOM ID of the token will be converted to
-#' `"overshiny_token_<inputId>"`. This transformed ID is important for internal
+#' `"overshiny_token_<id>"`. This transformed ID is important for internal
 #' interaction logic (e.g. for use with JavaScript drag/drop handlers). When
 #' referencing the token programmatically (e.g. in CSS selectors or custom
 #' JavaScript), use the full prefixed ID (see examples).
 #'
-#' @param inputId The `input` slot used for the token.
+#' @param id A unique ID for the token (a character string without spaces).
 #' @param name Text (or HTML) to be displayed on the token itself.
 #' @param label Text label that will appear on the overlay.
 #'
@@ -70,11 +70,11 @@ useOverlay = function()
 #' @seealso [overlayServer()], for a complete example.
 #'
 #' @export
-overlayToken = function(inputId, name, label = name)
+overlayToken = function(id, name, label = name)
 {
     htmltools::tags$span(htmltools::HTML(name),
         `data-label` = label,
-        id = ovid("token", inputId),
+        id = ovid("token", id),
         class = "overshiny-token")
 }
 
