@@ -131,7 +131,10 @@
 #'
 #'     output$my_plot <- shiny::renderPlot({
 #'         df <- data.frame(x = seq(0, 2 * pi, length.out = 200))
-#'         df$y <- sin(df$x) + 0.1 * sum(ov$active * (df$x > ov$cx0 & df$x < ov$cx1))
+#'         mat <- function(x, byrow = FALSE) matrix(x, nrow = ov$n, ncol = length(df$x), byrow = byrow)
+#'         overlap <- mat(df$x, byrow = TRUE) >= mat(ov$cx0) &
+#'             mat(df$x, byrow = TRUE) <= mat(ov$cx1)
+#'         df$y <- sin(df$x) + 0.1 * colSums(ov$active * overlap)
 #'         plot(df, type = "l")
 #'         overlayBounds(ov, "base")
 #'     })

@@ -44,7 +44,7 @@ useOverlay = function()
 
 #' Create an overlay token input control
 #'
-#' Create a token that can be dragged onto an (overlay plot)[overlayPlotOutput()]
+#' Create a token that can be dragged onto an [overlay plot][overlayPlotOutput]
 #' to create a new overlay.
 #'
 #' Note that the DOM ID of the token will be converted to
