@@ -141,7 +141,6 @@ mysnap <- function(ov, i) {
 }
 
 ui <- shiny::fluidPage(
-    useOverlay(),
     overlayPlotOutput("my_plot", 640, 480),
     overlayToken("add", "Raise")
     # further UI elements here . . .

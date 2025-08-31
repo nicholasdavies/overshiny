@@ -146,7 +146,6 @@ overlayImageOutput = function(outputId, width, height)
 #'
 #' @examples
 #' ui <- shiny::fluidPage(
-#'     useOverlay(),
 #'     overlayPlotOutput("my_plot", 640, 480)
 #'     # further UI elements here . . .
 #' )
