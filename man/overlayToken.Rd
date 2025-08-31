@@ -17,7 +17,7 @@ overlayToken(inputId, name, label = name)
 An overlay token input control that can be added to a UI definition.
 }
 \description{
-Create a token that can be dragged onto an \href{overlayPlotOutput()}{overlay plot}
+Create a token that can be dragged onto an \link[=overlayPlotOutput]{overlay plot}
 to create a new overlay.
 }
 \details{
