@@ -2,16 +2,6 @@ library(shiny)
 library(ggplot2)
 library(overshiny)
 
-# overlayToken(inputId, name) BY THE WAY, is that actually an inputId? I don't think it is
-# could be overlayTokens("group_name", grow = "Grow", br(), shrink = "Shrink") etc
-# as in, first you name a group, then named elements are tokens, unnamed elements
-# are html to be put in between the tokens.
-# Then within the menu, which could be ov$menu, give controls names like
-# "group_name_label" which would automatically link to label (also active, show,
-# cx0, cx1, cw), or "group_name_strength" which would create a new entry in
-# ov$settings. overlayServer would need to take both group and plot. (But
-# could support multiple plots?)
-
 # --- User interface ---
 ui <- fluidPage(
     titlePanel("Overlay demo"),
@@ -21,6 +11,8 @@ ui <- fluidPage(
             # Control whether overlays are displayed and whether they alter the plot
             checkboxInput("show_overlays", "Show overlays", value = TRUE),
             checkboxInput("enable_logic", "Enable overlay logic", value = TRUE),
+            checkboxInput("enable_snap", "Use snapping", value = TRUE),
+            checkboxInput("stagger", "Stagger overlays", value = TRUE),
             tags$hr(),
 
             # Select date range for the plot
@@ -35,7 +27,7 @@ ui <- fluidPage(
 
         mainPanel(
             # Main plot with support for overlays
-            overlayPlotOutput("plot", width = "100%", height = 300)
+            overlayPlotOutput("plot", width = 500, height = 300)
         )
     )
 )
@@ -45,8 +37,25 @@ server <- function(input, output, session)
 {
     # --- OVERLAY SETUP ---
 
+# Example of a valid snapping function: snap to nearest round number and
+# make sure the overlay is at least 10 units wide.
+mysnap <- function(ov, i) {
+    # remove any "out of bounds" overlays with a tolerance of 1 pixel
+    tol <- ov$bound_cw / ov$bound_pw
+    oob <- seq_len(ov$n) %in% i &
+        (ov$cx0 < ov$bound_cx - tol | ov$cx1 > ov$bound_cx + ov$bound_cw + tol)
+    ov$active[oob] <- FALSE
+
+    # adjust position and width
+    widths <- pmax(10, round(ov$cx1[i] - ov$cx0[i]))
+    ov$cx0[i] <- pmax(round(ov$bound_cx),
+        pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
+    ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
+}
+
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56) # 56 days = 8 weeks default width
+    ov <- overlayServer("plot", 8, width = 56, snap = mysnap, # 56 days = 8 weeks default width
+        style = list(border = "1px dotted grey"))
 
     # Reactive values to store custom per-overlay settings
     opt <- reactiveValues(
@@ -57,6 +66,16 @@ server <- function(input, output, session)
     # Toggle overlay visibility based on checkbox
     observe({
         ov$show <- isTRUE(input$show_overlays)
+    })
+
+    # Toggle snap
+    observe({
+        ov$snap <- ifelse(isTRUE(input$enable_snap), mysnap, "none")
+    })
+
+    # Toggle stagger
+    observe({
+        ov$stagger <- ifelse(isTRUE(input$stagger), 0.045, 0)
     })
 
     # --- OVERLAY DROPDOWN MENU ---
@@ -123,11 +142,10 @@ server <- function(input, output, session)
 
         overlayBounds(ov, plot,
             xlim = c(input$date_range),
-            ylim = c(0, NA))
+            ylim = c(0, NA) + 0 * ov$px)
     })
-
-    print(input)
 }
 
 # --- Run app ---
 shinyApp(ui, server)
+
