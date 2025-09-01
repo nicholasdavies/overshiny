@@ -91,9 +91,11 @@ an app, which often makes it harder to catch errors. So let’s start with
 our infectious disease model in <code>epidemics</code> and move on to
 the <code>shiny</code> app later on.</p>
 <p>First, make sure you have the <code>epidemics</code> package
-installed:</p>
+installed, and the most recent version of <code>overshiny</code> (the
+version on CRAN is not recent enough for this tutorial!):</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"epiverse-trace/epidemics"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"epiverse-trace/epidemics"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"nicholasdavies/overshiny"</span><span class="op">)</span></span></code></pre></div>
 <p>Now, let’s build a simple function that will produce a simulation run
 from <code>epidemics</code> and return the results.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
