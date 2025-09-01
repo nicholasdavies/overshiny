@@ -100,6 +100,7 @@ version on CRAN is not recent enough for this tutorial!):</p>
 from <code>epidemics</code> and return the results.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">epidemics</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Model run function</span></span>
 <span><span class="va">run_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span></span>
@@ -126,7 +127,7 @@ individuals, and <code>pop_size</code> is the total population size.
 Test this function out and see if you can plot the prevalence of
 infection (compartment <code>"infectious"</code>) before continuing.</p>
 <details><summary>
-Click for one possible answer
+Click for one possible answer…
 </summary><p>Here’s how you might do it using <code>ggplot2</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="op">)</span></span>
@@ -134,6 +135,8 @@ Click for one possible answer
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence"</span><span class="op">)</span></span></code></pre></div>
+You should see an exponentially growing epidemic (with a little dip at
+the start).
 </details><div class="section level3">
 <h3 id="connecting-to-a-mock-up-of-input">Connecting to a mock-up of <code>input</code><a class="anchor" aria-label="anchor" href="#connecting-to-a-mock-up-of-input"></a>
 </h3>
@@ -143,9 +146,11 @@ epidemic curve based on some default parameters. We want
 of our app can provide parameters like the basic reproduction number
 <i>R</i><sub>0</sub>, the infectious period, the duration of the
 epidemic, and so on.</p>
-<p>Within <code>shiny</code>, user input is provided in a list called
+<p>Within <code>shiny</code>, user input is provided in a list<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Technically it’s not a list, it’s a
+&lt;code&gt;&lt;a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link"&gt;shiny::reactiveValues()&lt;/a&gt;&lt;/code&gt; object, but in many ways it behaves
+like a normal R list.&lt;/p&gt;'><sup>1</sup></a> called
 <code>input</code>. So let’s say that the <code>input</code> list
-contained the following:</p>
+contains the following:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="co"># Start and end dates of the epidemic</span></span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">date_range =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">"2025-01-01"</span>, <span class="st">"2025-12-31"</span>)),</span>
@@ -173,9 +178,11 @@ tractable units that infectious disease modellers use.</p>
 <code>epidemics::population()</code> and
 <code>epidemics::model_default()</code>, can you rewrite the
 <code>run_model()</code> function so that it sets all the relevant
-parameters according to the <code>input</code> list above?</p>
+parameters from the <code>input</code> list above? Rewrite it so that
+<code>input</code> is passed as an argument to
+<code>run_model()</code>.</p>
 <details><summary>
-Click for one possible answer
+Click for one possible answer…
 </summary><p>Here’s how you might do it:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Model run function</span></span>
@@ -274,18 +281,23 @@ e.g. here the <code>fluidPage</code> contains several elements, which
 themselves may contain several other elements. <code>fluidPage</code> is
 just one option for the top-level element; others include
 <code>fixedPage</code> or <code>basicPage</code>. <code>fluidPage</code>
-is a flexible layout that can dynamically rearrange the elements if your
-user is using a smaller screen like on a mobile phone, so it’s handy to
-use.</p>
+is a flexible layout that can dynamically rearrange the elements if
+someone is using your app on a smaller screen, like on a mobile phone,
+so it’s handy to use.</p>
 <p>To make use of this dynamic rearrangement, a <code>fluidPage</code>
-is divided into rows, defined using the function <code>fluidRow</code>,
-and each <code>fluidRow</code> is divided into columns, where all of the
-columns in a row together have a width that adds up to 12. They chose 12
-because it divides well into 1, 2, 3, 4, or 6 sections. On a computer,
-normally you will see the <code>fluidRow</code> all in one actual row,
-but if you are looking at your Shiny app on a smaller screen, you might
-see your <code>fluidRow</code> broken up across multiple actual rows. As
-an example, if your <code>shiny</code> ui contains:</p>
+is divided into rows, which are defined using the <code>shiny</code>
+function <code>fluidRow</code>. In turn, each <code>fluidRow</code> is
+divided into columns (with the <code>shiny</code> function
+<code>column</code>). Each <code>column</code> within a
+<code>fluidRow</code> has a width, and the width of all the columns in a
+row together should add up to 12. (In a <code>fluidRow</code>, columns
+can only have whole-number widths.) They chose 12 as the total width of
+a row because it divides well into 1, 2, 3, 4, or 6 columns. On a
+computer screen, normally you will see the <code>fluidRow</code> all in
+one actual row, but if you are looking at your Shiny app on a smaller
+screen, like on a phone, you might see your <code>fluidRow</code> broken
+up across multiple actual rows.</p>
+<p>As an example, if your <code>shiny</code> ui contains:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidRow</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/column.html" class="external-link">column</a></span><span class="op">(</span><span class="fl">4</span>, <span class="st">"part one"</span><span class="op">)</span>,</span>
@@ -327,28 +339,32 @@ elements.</p>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>This defines a <code>fluidPage</code> with 12 columns. There is a
+<p>This defines a <code>fluidPage</code>. There is a
 <code>titlePanel</code> at the top; anything not explicitly in a
 <code>fluidRow</code> takes up a whole row, so the title panel appears
-on its own row. Then there is a <code>fluidRow</code> with three
+on its own row. Then there is a <code>fluidRow</code>, which by
+definition has a total “width” of 12 units. It contains three
 <code>column</code>s each of size 4 (to add up to 12); the size of the
 column is the first parameter to <code>column</code> and then all the
-elements that should appear in the column are subsequent arguments.
-Here, each column contains a header <code>h3</code> with some text. In
-HTML, <code>h1</code> through <code>h6</code> define headers for
+elements that should appear in the column are subsequent arguments.</p>
+<p>Here, each column contains a header <code>h3</code> with some text.
+In HTML, <code>h1</code> through <code>h6</code> define headers for
 sections, where <code>h1</code> is the biggest and <code>h6</code> is
 the smallest. You don’t need to start at <code>h1</code> and work your
 way down, and often people select header levels (<code>h1</code> through
 <code>h6</code>) based on aesthetics (i.e. which size looks right)
-rather than a strict logical ordering, which is what we have done here.
-To be clear, there’s no direct relationship between the header level and
-the column size.</p>
+rather than a strict logical ordering. We’ve gone based on aesthetics
+here; we could have used <code>h1</code> instead of <code>h3</code> but
+I think it looks too big (try it and see for yourself!). To be clear,
+there’s no relationship between the header level and the column
+size.</p>
 <div class="section level3">
 <h3 id="adding-input-widgets">Adding input widgets<a class="anchor" aria-label="anchor" href="#adding-input-widgets"></a>
 </h3>
 <p>Now we’ll edit our Shiny app skeleton to have some more interesting
-things going on. Take a look at the code below and how it expands on the
-user interface we defined above, then run the whole excerpt:</p>
+things going on. Take a look at the code below. We have added new
+elements to the three columns we had before. After you’ve looked at
+these, run this entire following script:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">epidemics</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
@@ -391,18 +407,18 @@ user interface we defined above, then run the whole excerpt:</p>
 <span><span class="co"># --- Run app ---</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
 <p>Now we’re getting somewhere! We’ve added some input widgets to the
-first two columns. <code>shiny</code> gives us, among others,
+first two columns. <code>shiny</code> gives us
 <code><a href="https://rdrr.io/pkg/shiny/man/dateRangeInput.html" class="external-link">dateRangeInput()</a></code> to put in a range of dates (you can use
 <code><a href="https://rdrr.io/pkg/shiny/man/dateInput.html" class="external-link">dateInput()</a></code> for just one date); <code><a href="https://rdrr.io/pkg/shiny/man/numericInput.html" class="external-link">numericInput()</a></code>
 to enter a number using an input box (or <code><a href="https://rdrr.io/pkg/shiny/man/textInput.html" class="external-link">textInput()</a></code> for
 free text input); and <code><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput()</a></code> to enter a number using
-a slider. <code>shiny</code> also provides lots of other functions
-called <code>xxxInput()</code> which follow some common conventions: the
-first argument is a special ID which we’ll use later, the second
-argument is a label to show next to the input, and then the other inputs
-define things like the starting value or the minimum and maximum. For
-more information, consult the <code>shiny</code> manual with
-e.g. <code><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">?sliderInput</a></code>.</p>
+a slider–plus many more options. All of the input “widgets” provided by
+<code>shiny</code> are called <code>[something]Input()</code> and they
+follow some common conventions: the first argument is a special ID which
+we’ll use later, the second argument is a label to show next to the
+input, and then the other inputs define things like the starting value
+or the minimum and maximum. For more information, consult the
+<code>shiny</code> manual with e.g. <code><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">?sliderInput</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -505,23 +521,44 @@ code underneath what you have already:</p>
 <p>If you put all this together, you should have a working model that
 connects to the user input, where the epidemic curve changes depending
 on how you manipulate the various input controls.</p>
-<p>Before continuing, let’s tidy up the output a little. First of all,
-the y-axis of the plot extends up into the millions, and numbers like
-“1e+06” are a little tough to interpret. Try changing the plotting code
-in the <code>server</code> function so that the output is in thousands
-and this is indicated on the y-axis label.</p>
-<p>Second, the x-axis is in days from 0 to the duration of the epidemic,
-but we are providing our <code>shiny</code> app with specific dates. Try
-making the x-axis show calendar dates instead of the number of days from
-the beginning of the epidemic. (Hint: you can use the <code>input</code>
-list here.)</p>
+<p>That handful of lines in <code>server</code> is doing a lot. First,
+note that we’re calling the <code>shiny</code> function
+<code>renderPlot</code>, and assigning the value to
+<code>output$plot</code>. The reason <code>output$plot</code> exists is
+because we put a <code>plotOutput</code> in the <code>shiny</code> UI
+with ID <code>"plot"</code> – this makes an entry in <code>output</code>
+called <code>plot</code> which is ready to receive a plot from the
+server function. If in our UI, we had given our <code>plotOutput</code>
+a different ID, like:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>    <span class="fu">plotOutput</span>(<span class="st">"marmite"</span>, <span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="dv">400</span>),</span></code></pre></div>
+<p>then we would have to assign the results of a call to
+<code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code> to <code>output$marmite</code>.</p>
+<p>Within <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code>, the first argument is a bit of R
+code (in curly braces, <code><a href="https://rdrr.io/r/base/Paren.html" class="external-link">{}</a></code>) that should return a ggplot2
+plot, or produce a base R plot. Finally, note that we are now passing
+the <code>shiny</code> input object <code>input</code> to
+<code>run_model()</code>. <code>run_model()</code> is expecting
+<code>input</code> to contain values named <code>date_range</code>,
+<code>R0</code>, and so on; because we have made all those input widgets
+in out UI above, <code>input</code> automatically contains the values
+that have been entered.</p>
+<p>OK. Before continuing, let’s tidy up the output a little. First of
+all, the y-axis of the plot extends up into the millions, and numbers
+like “1e+06” are a little tough to interpret. Try changing the plotting
+code in the <code>server</code> function so that the plot y-axis is in
+thousands, and this is indicated on the y-axis label.</p>
+<p>Second, the x-axis is currently in days from 0 to the duration of the
+epidemic, but we are providing our <code>shiny</code> app with specific
+dates. Try making the x-axis show calendar dates instead of the number
+of days from the beginning of the epidemic. (Hint: you can use the
+<code>input</code> list here.)</p>
 <details><summary>
-Click for one possible answer
+Click for one possible answer…
 </summary><p>Here’s how you might make these changes to the <code>server</code>
 function just by changing the call to <code>ggplot</code>:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
@@ -533,12 +570,12 @@ function just by changing the call to <code>ggplot</code>:</p>
 interventions such as social distancing and vaccination on our
 infectious disease transmission model. We’re not going to get into the
 fine details of how specifically to model these interventions, this is
-more just to demonsrate how <code>overshiny</code> works in the context
+more just to demonstrate how <code>overshiny</code> works in the context
 of the model we’ve developed.</p>
 <p>Starting from the code we developed in the last section:</p>
 <details><summary>
 Click for starter code…
-</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+</summary><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">epidemics</span><span class="op">)</span></span>
@@ -611,63 +648,63 @@ Click for starter code…
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># --- Run app ---</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
-</details><p>First, we need to include the <code>overshiny</code> package
+</details><p>First, we now need to include the <code>overshiny</code> package
 with:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nicholasdavies/overshiny" class="external-link">overshiny</a></span><span class="op">)</span></span></code></pre></div>
 <p>Second, we need to change our <code>plotOutput</code> plot in our UI
 to an <code>overlayPlotOutput</code> so that it can respond to
 overlays:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>    <span class="co"># Main plot</span></span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>    <span class="fu">overlayPlotOutput</span>(<span class="st">"plot"</span>, <span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="dv">400</span>),</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>    <span class="co"># Main plot</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>    <span class="fu">overlayPlotOutput</span>(<span class="st">"plot"</span>, <span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="dv">400</span>),</span></code></pre></div>
 <p>Third, we need to add some <code><a href="../reference/overlayToken.html">overlayToken()</a></code>s that can be
 dragged onto the plot. Let’s put these into the currently-blank
 “Interventions” section of our UI:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/column.html" class="external-link">column</a></span><span class="op">(</span><span class="fl">4</span>,</span>
 <span>            <span class="co"># Overlay controls: tokens that can be dragged onto the plot</span></span>
 <span>            <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h3</a></span><span class="op">(</span><span class="st">"Interventions"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vax"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"txi"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vx"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"tx"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span></code></pre></div>
 <p>Fourth, we need to initialize the overlay logic in our
 <code>server</code> function by putting a call to
 <code>overlayServer</code> at the top of the <code>server</code>
 function:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># --- App logic ---</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output)</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>{</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>    <span class="co"># --- OVERLAY SETUP ---</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"plot"</span>, <span class="dv">8</span>)</span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>    <span class="co"># rest of code follows as normal...</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># --- App logic ---</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output)</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>{</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>    <span class="co"># --- OVERLAY SETUP ---</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"plot"</span>, <span class="dv">8</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>    <span class="co"># rest of code follows as normal...</span></span></code></pre></div>
 <p>And finally, we need to modify our call to <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code>
 in the <code>server</code> function to tell <code>overshiny</code> more
 information about our plot. Where before we had:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
-<span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
-<span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>Now, we have:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
+<span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>Now, we have:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
+<span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
 <span>        </span>
 <span>        <span class="fu"><a href="../reference/overlayBounds.html">overlayBounds</a></span><span class="op">(</span><span class="va">ov</span>, <span class="va">plot</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
@@ -688,22 +725,27 @@ information about our plot. Where before we had:</p>
 <code>ylim</code>, the y-coordinate limits of the plot.</li>
 </ul>
 <p><code>xlim</code> and <code>ylim</code> are not required, but because
-<code>ggplot</code> by default includes a bit of extra space around the
-plotted elements (i.e. the x-axis doesn’t start right at the epidemic
-start date, but a little before), providing these allows
-<code>overshiny</code> to restrict where the overlays can move to the
-region where the epidemic is actually running. It’s similar for
-<code>ylim</code> (try removing the <code>xlim</code> and
-<code>ylim</code> arguments to <code>overlayBounds</code> to see what
-happens.)</p>
+<code>ggplot</code> by default includes a bit of extra space on the axes
+(i.e. the x-axis doesn’t start precisely at the epidemic start date, but
+a little before to provide some visual padding), providing these allows
+<code>overshiny</code> to restrict the overlays such that they can only
+move over the time span in which the epidemic is actually occurring.
+It’s similar for <code>ylim</code> (try removing the <code>xlim</code>
+and <code>ylim</code> arguments to <code>overlayBounds</code> to see
+what happens.)</p>
+<p><code><a href="../reference/overlayBounds.html">overlayBounds()</a></code> itself returns the <code>plot</code>
+object, so it should be the last line in your expression that you pass
+to <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code>.</p>
 <p>You should now be able to drag the intervention tokens onto the plot,
 where they will become overlays that you can move around, resize, and
-remove by clicking on the “gears” icon on each overlay. They won’t do
-anything yet to the epicurve, though. If you’ve gotten stuck, here’s the
-code you could have arrived at:</p>
+remove by clicking on the “gears” icon on each overlay (then the
+“remove” button). They won’t do anything yet to the epicurve yet,
+though; that’s for the next section.</p>
+<p>If you’ve gotten stuck and your code isn’t working, here’s some code
+you could have arrived at:</p>
 <details><summary>
 Click for code…
-</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+</summary><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">epidemics</span><span class="op">)</span></span>
@@ -766,8 +808,8 @@ Click for code…
 <span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/column.html" class="external-link">column</a></span><span class="op">(</span><span class="fl">4</span>,</span>
 <span>            <span class="co"># Overlay controls: tokens that can be dragged onto the plot</span></span>
 <span>            <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h3</a></span><span class="op">(</span><span class="st">"Interventions"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vax"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"txi"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vx"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"tx"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -786,7 +828,7 @@ Click for code…
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
 <span>        </span>
 <span>        <span class="fu"><a href="../reference/overlayBounds.html">overlayBounds</a></span><span class="op">(</span><span class="va">ov</span>, <span class="va">plot</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
@@ -803,20 +845,22 @@ model.</p>
 <h3 id="making-the-interventions-work">Making the interventions work<a class="anchor" aria-label="anchor" href="#making-the-interventions-work"></a>
 </h3>
 <p>The last piece of the puzzle is to make the interventions actually
-have an impact on what is being plotted. We are using the function
-<code>model_default()</code> from <code>epidemics</code> to run our
-model, and now we will use the <code>intervention</code> and
+have an impact on the simulated epidemic. Already, we are using the
+function <code>model_default()</code> from <code>epidemics</code> to run
+our model, and now we will use the <code>intervention</code> and
 <code>vaccination</code> arguments to <code>model_default()</code> to
 make our interventions work.</p>
 <p>First, let’s change <code>run_model()</code> so that it can pass on
-these extra parameters to <code>epidemics::model_default()</code>. To do
-that, add a <code>...</code> to the list of parameters and pass these
-extra parameters to <code>model_default()</code>, like so (there are
+these extra parameters (<code>intervention</code> and
+<code>vaccination</code>) to <code>epidemics::model_default()</code>. To
+do that, add a <code>...</code> to the list of parameters so that
+<code>run_model()</code> can take other (arbitrarily-named) parameters
+and pass them on to <code>model_default()</code>, like so (there are
 just two changes to make):</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Model run function</span></span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>run_model <span class="ot">&lt;-</span> <span class="cf">function</span>(input, ...)  <span class="co"># &lt;-- FIRST CHANGE HERE</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="co"># Model run function</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>run_model <span class="ot">&lt;-</span> <span class="cf">function</span>(input, ...)  <span class="co"># &lt;-- FIRST CHANGE HERE</span></span></code></pre></div>
 <p>… and then …</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="co"># Run model</span></span>
 <span>    <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">model_default</span><span class="op">(</span><span class="va">pop</span>, transmission_rate <span class="op">=</span> <span class="va">trans_rate</span>,</span>
 <span>        infectiousness_rate <span class="op">=</span> <span class="va">infec_rate</span>, recovery_rate <span class="op">=</span> <span class="va">recov_rate</span>,</span>
@@ -824,10 +868,10 @@ just two changes to make):</p>
 <span></span>
 <span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span> <span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 <p>Now, let’s modify the call to <code>renderPlot</code> so that it
-reads in what interventions have been dragged onto the plot and fills
-out the <code>intervention</code> and <code>vaccination</code>
-parameters accordingly.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+reads in what overlays have been placed onto the plot, and fills out the
+<code>intervention</code> and <code>vaccination</code> parameters
+accordingly.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="co"># Create interventions</span></span>
 <span>        <span class="va">tx_int</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -867,14 +911,14 @@ parameters accordingly.</p>
 <span>        <span class="co"># Process results (this is the same as before)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
 <span>        </span>
 <span>        <span class="fu"><a href="../reference/overlayBounds.html">overlayBounds</a></span><span class="op">(</span><span class="va">ov</span>, <span class="va">plot</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <details><summary>
-(Complete code for the whole script is here)
-</summary><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+(Just in case, complete code for the whole script is here…)
+</summary><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">epidemics</span><span class="op">)</span></span>
@@ -937,8 +981,8 @@ parameters accordingly.</p>
 <span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/column.html" class="external-link">column</a></span><span class="op">(</span><span class="fl">4</span>,</span>
 <span>            <span class="co"># Overlay controls: tokens that can be dragged onto the plot</span></span>
 <span>            <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h3</a></span><span class="op">(</span><span class="st">"Interventions"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vax"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"txi"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vx"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"tx"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -992,7 +1036,7 @@ parameters accordingly.</p>
 <span>        <span class="co"># Process results (this is the same as before)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
 <span>        </span>
 <span>        <span class="fu"><a href="../reference/overlayBounds.html">overlayBounds</a></span><span class="op">(</span><span class="va">ov</span>, <span class="va">plot</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
@@ -1003,18 +1047,18 @@ parameters accordingly.</p>
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
 </details><p>Compare the new call to <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code> to what we had
 before, which was:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
-<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span> <span class="op">+</span> <span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, y <span class="op">=</span> <span class="va">value</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Infection prevalence (thousands)"</span><span class="op">)</span></span>
 <span>        </span>
 <span>        <span class="fu"><a href="../reference/overlayBounds.html">overlayBounds</a></span><span class="op">(</span><span class="va">ov</span>, <span class="va">plot</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>A lot has changed, so let’s take it step by step. First:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<p>A lot has been added, so let’s take it step by step. First:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>        <span class="co"># Create interventions</span></span>
 <span>        <span class="va">tx_int</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>        <span class="va">vax</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
@@ -1023,8 +1067,8 @@ interventions to apply; <code>tx_int</code> (for interventions on the
 transmission rate) and <code>vax</code> (for a vaccination
 campaign).</p>
 <p>Then, we process the overlay data from the <code>ov</code> object
-returned by <code><a href="../reference/overlayServer.html">overlayServer()</a></code>:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+that is provided by <code><a href="../reference/overlayServer.html">overlayServer()</a></code>:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>        <span class="co"># Apply overlays as interventions</span></span>
 <span>        <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">active</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>            <span class="va">begin</span> <span class="op">&lt;-</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">date_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -1048,27 +1092,26 @@ returned by <code><a href="../reference/overlayServer.html">overlayServer()</a><
 maximum number of overlays (here, 8), which is <code>TRUE</code> for
 overlays that are on the plot and <code>FALSE</code> for overlays that
 aren’t. So <code>for (i in which(ov$active))</code> runs a loop for all
-indices <code>i</code> that correspond to an active overlay.</p>
+indices <code>i</code> that correspond to an “active” overlay.</p>
 <p>Then we read <code>begin</code> and <code>end</code> – the start time
 and end time for each intervention – from <code>ov$cx0</code> (the
 starting x-coordinate of each overlay) and from <code>ov$cx1</code> (the
 ending x-coordinate of each overlay). We work out how many days into the
-epidemic <code>begin</code> and <code>end</code> should be by
-subtracting the numeric value of the start date of the epidemic,
+epidemic <code>begin</code> and <code>end</code> are by subtracting the
+numeric value of the start date of the epidemic,
 <code>as.numeric(input$date_range[1])</code>.</p>
 <p>Then, each overlay has a <code>label</code> which corresponds to the
 <code>label</code> of the <code><a href="../reference/overlayToken.html">overlayToken()</a></code> which created it.
 So we check whether the overlay with index <code>i</code> is a
-<code>"Vaccination"</code> or a <code>"Transmission"</code>
-intervention.</p>
+<code>"Vaccination"</code> or a <code>"Transmission"</code> overlay.</p>
 <p>For vaccination overlays, we set the vaccination rate <code>nu</code>
 to 0.01, which (to <code>epidemics</code>) means 1% of the population is
 getting vaccinated per day. If there isn’t already a vaccination
 intervention (and hence <code>vax</code> is <code>NULL</code>) then we
 create one. If there is, then we can’t add a second vaccination
 intervention since the <code>epidemics</code> package only allows one
-vaccination intervention; so we deactivate the vaccine intervention if
-one already exists.</p>
+vaccination intervention; so we deactivate the (second, superfluous)
+vaccine intervention if one already exists.</p>
 <p>For transmission overlays, we set the transmission reduction
 <code>reduc</code> to 0.5, which means a reduction in the transmission
 rate by 50%. We add our new intervention to the list
@@ -1076,7 +1119,7 @@ rate by 50%. We add our new intervention to the list
 transmission-rate interventions, so we don’t need to limit the number of
 these.</p>
 <p>Next in the code, we have this:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>        <span class="co"># Put interventions in the right format</span></span>
 <span>        <span class="va">int</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>        <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tx_int</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -1089,9 +1132,16 @@ these.</p>
 <span>            intervention <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">int</span><span class="op">)</span><span class="op">)</span> <span class="va">int</span> <span class="kw">else</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
 <p>This just turns our list of transmission interventions
 <code>tx_int</code> into the right format for <code>epidemics</code> to
-understand, then calls our function <code>run_model</code> with the
-appropriate intervention data for <code>vaccination</code> and
-<code>intervention</code>.</p>
+understand. It wants the <code>intervention</code> argument to be a list
+with elements named <code>"transmission_rate"</code>,
+<code>"infectiousness_rate"</code>, <code>"recovery_rate"</code>, or
+<code>"contacts"</code> depending on what kind of intervention it is.
+Each of these elements should be one or several interventions, and the
+way to combine interventions is with <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code> (hence the
+<code>do.call</code>).</p>
+<p>Then the code above calls our function <code>run_model</code> with
+the appropriately-formatted intervention data for
+<code>vaccination</code> and <code>intervention</code>.</p>
 <p>Put this all together, and you have a working app with intervention
 overlays!</p>
 </div>
@@ -1102,21 +1152,23 @@ overlays!</p>
 <p>We have come to the end of the tutorial. We haven’t explored
 everything that <code>shiny</code> and <code>overshiny</code> can do,
 but we have gone through the basics.</p>
-<p>It would be nice to modify our app to do two things:</p>
+<p>As a next step, it would be nice to modify our app to do two
+things:</p>
 <ol style="list-style-type: decimal">
-<li>Compare the mitigated epidemic to the counterfactual, unmitigated
-epidemic without any interventions.</li>
-<li>Allow us to customize the vaccination rate and the strength of the
-transmission interventions, instead of leaving these at 0.1% and 50%
-respectively.</li>
+<li>Compare the mitigated epidemic to the counterfactual–an unmitigated
+epidemic without any interventions. We could do this by plotting both
+epi curves, with the unmitigated epi curve in a lighter colour.</li>
+<li>Allow us to customize the vaccination rate or the transmission
+reduction percentage of each intervention, instead of leaving these at
+0.1% and 50% respectively.</li>
 </ol>
-<p>The following code snippet shows you how to accomplish both of these
+<p>The following script shows you how to accomplish both of these
 things. Use the <code>shiny</code> and <code>overshiny</code> package
-documentation for insight into how these changes have been made. Good
-luck!</p>
+documentation for insight into what all the changes from your existing
+code do and how they work. Good luck!</p>
 <details><summary>
-Advanced code follows…
-</summary><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+Click for advanced code…
+</summary><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">epidemics</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nicholasdavies/overshiny" class="external-link">overshiny</a></span><span class="op">)</span></span>
@@ -1151,8 +1203,8 @@ Advanced code follows…
 <span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/column.html" class="external-link">column</a></span><span class="op">(</span><span class="fl">4</span>,</span>
 <span>            <span class="co"># Overlay controls: tokens that can be dragged onto the plot</span></span>
 <span>            <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">h3</a></span><span class="op">(</span><span class="st">"Interventions"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vax"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"txi"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"vx"</span>, <span class="st">"Vaccination"</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="../reference/overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"tx"</span>, <span class="st">"Transmission"</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -1277,6 +1329,7 @@ Advanced code follows…
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
 </details>
 </div>
+
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
