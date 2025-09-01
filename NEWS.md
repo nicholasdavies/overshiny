@@ -1,3 +1,7 @@
+# overshiny (development version)
+
+* Simplified use of overlay dropdown menus.
+
 # overshiny 0.1.1
 
 * `useOverlay()` is now called automatically if you use `overlayPlotOutput()`.

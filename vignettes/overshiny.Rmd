@@ -70,13 +70,8 @@ server <- function(input, output, session)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56) # 56 days = 8 weeks default width
-
-    # Reactive values to store custom per-overlay settings
-    opt <- reactiveValues(
-        type = rep("Grow", 8),        # type of overlay action
-        strength = rep(50, 8)         # strength as a percentage
-    )
+    ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
+        data = list(strength = 50), snap = snap_grid())
 
     # Toggle overlay visibility based on checkbox
     observe({
@@ -87,14 +82,15 @@ server <- function(input, output, session)
 
 The call to `overlayServer()` initializes (up to) 8 overlays that we can use. 
 It also sets the default width of new overlays to 56, which is in plot 
-coordinates. We'll be plotting a time series, so this means 56 days (8 weeks).
+coordinates. We'll be plotting a time series, so this means 56 days (8 weeks). 
+It provides the argument `data`, which is a list of additional attributes to be
+associated with each overlay. Here we're specifying that each overlay will have 
+an associated `strength` attribute, which we'll use to determine how much each
+overlay affects the output. And finally, we use `snap = snap_grid()` to specify
+a snapping function; the default parameters for `snap_grid()` ensure that each
+overlay's position and width is snapped to the nearest whole number.
 
-Then we create `opt`, a `reactiveValues()` object that we will use to store
-additional properties of the overlays. Here we're going to keep track of a
-"type" for each overlay ("Grow" or "Shrink") as well as a "strength" for
-each overlay (in percent).
-
-Finally, we start with some of the reactive logic of the overlays. We have a 
+Then, we start with some of the reactive logic of the overlays. We have a 
 checkbox in our UI to control whether the overlays are shown or not, and the
 call to `observe()` makes the overlays show or hide based on the value of
 this checkbox.
@@ -107,10 +103,14 @@ Continuing on:
     # Render dropdown menu when an overlay is being edited
     output$plot_menu <- renderUI({
         i <- req(ov$editing)  # Current overlay being edited
-        tagList(
-            textOutput("dates"),
-            selectInput("type", NULL, choices = c("Grow", "Shrink"), selected = ov$label[i]),
-            sliderInput("strength", "Strength", min = 0, max = 100, value = opt$strength[i])
+        fmt <- function(t) format(as.Date(t, origin = "1970-01-01"), "%b %d")
+
+        list(
+            div(paste(fmt(ov$cx0[i]), "–", fmt(ov$cx1[i]))),
+            selectInput("plot_label", NULL, choices = c("Grow", "Shrink"), selected = ov$label[i]),
+            sliderInput("plot_strength", "Strength", min = 0, max = 100, value = ov$data$strength[i]),
+            dateInput("plot_cx", "Start date", value = ov$cx0[i]),
+            sliderInput("plot_cw", "Duration", min = 1, max = floor(ov$bound_cw), value = ov$cx1[i] - ov$cx0[i])
         )
     })
 
@@ -124,9 +124,16 @@ remove the overlay. But we can add extra elements to these menus by using
 Since we created an `overlayPlotOutput()` with the output ID `"plot"`, 
 `overshiny` has also created a UI output slot named `"plot_menu"` which is used 
 to add extra elements to each overlay's dropdown menu. For our purposes, we'll
-include a `textOutput()` element which shows the date range for the overlay, a 
+include a `div()` element which shows the date range for the overlay, a 
 `selectInput()` to choose between "Grow" and "Shrink" type overlays, and a 
 `sliderInput()` to choose the percentage "strength" associated with the overlay.
+We also allow the user to manually enter the start date of each overlay 
+(`"plot_cx"`) and the width of each overlay (`"plot_cw"`). Here, `"plot_label"`,
+`"plot_cx"`, and `"plot_cw"` will automatically set the label, position, and
+width of each overlay because `"label"`, `"cx"`, and `"cw"` are interpreted
+specially by `overshiny`. `"strength"` doesn't have any special interpretation
+so it will be applied to `ov$data$strength`. See the documentation for
+`overlayServer()` for more details.
 
 The line `i <- req(ov$editing)` just gets the index (1 to 8) of the current
 overlay being edited. The call to `req()` ensures that the rest of the code
@@ -136,37 +143,6 @@ being edited via its dropdown menu.
 Note that above, each overlay has the same elements in its dropdown menu, but
 we could choose to return different contents for the dropdown menu depending on 
 which overlay is being edited.
-
-Now let's fill in some extra logic around those dropdown menus.
-
-```{r, eval = FALSE}
-    # Display date range for the currently edited overlay
-    output$dates <- renderText({
-        i <- req(ov$editing)
-        fmt <- function(t) format(as.Date(round(t), origin = "1970-01-01"), "%b %d")
-        paste(fmt(ov$cx0[i]), "–", fmt(ov$cx1[i]))
-    })
-
-    # Update stored strength when the slider changes
-    observeEvent(input$strength, {
-        i <- req(ov$editing)
-        opt$strength[i] <- input$strength
-    })
-
-    # Update stored type and overlay label when dropdown changes
-    observeEvent(input$type, {
-        i <- req(ov$editing)
-        opt$type[i] <- input$type
-        ov$label[i] <- input$type
-    })
-    
-```
-
-Above, we specify the "dates" label that will appear on the dropdown menus,
-and create some `observeEvent()`s that will update the `strength` and `type` 
-elements of the `opt` `reactiveValues()` object we created earlier based on
-what is done in the dropdown menu. We also change the label of the overlay 
-depending on what `type` is chosen from the menu.
 
 Now let's make some data to plot based on the overlays and their properties:
 
@@ -181,10 +157,10 @@ Now let's make some data to plot based on the overlays and their properties:
         # Modify signal according to active overlays if logic is enabled
         if (isTRUE(input$enable_logic)) {
             for (i in which(ov$active)) {
-                start <- as.Date(round(ov$cx0[i]), origin = "1970-01-01")
-                end <- as.Date(round(ov$cx1[i]), origin = "1970-01-01")
+                start <- as.Date(ov$cx0[i], origin = "1970-01-01")
+                end <- as.Date(ov$cx1[i], origin = "1970-01-01")
                 in_range <- date_seq >= start & date_seq <= end
-                factor <- opt$strength[i] / 100
+                factor <- ov$data$strength[i] / 100
                 y[in_range] <- y[in_range] * if (ov$label[i] == "Grow") (1 + factor) else (1 - factor)
             }
         }
@@ -197,8 +173,7 @@ Now let's make some data to plot based on the overlays and their properties:
 Above, we create a `reactive()` data.frame. We set up a sinusoidally-varying
 time series, then (if the "Enable overlay logic" checkbox is checked) we either
 "grow" or "shrink" this time series where it overlaps with each active overlay.
-We're using both the `ov` object returned by `overlayServer()` and our own
-`opt` object to do this.
+We're using the `ov` object returned by `overlayServer()` to do this.
 
 Finally, we render the time series:
 
@@ -212,9 +187,7 @@ Finally, we render the time series:
             ylim(0, 3) +
             labs(x = NULL, y = "Signal")
 
-        overlayBounds(ov, plot,
-            xlim = c(input$date_range),
-            ylim = c(0, NA))
+        overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })
 }
 ```
