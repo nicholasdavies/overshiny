@@ -56,6 +56,7 @@ plot.</p>
 <span>  <span class="va">outputId</span>,</span>
 <span>  <span class="va">nrect</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  snap <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  colours <span class="op">=</span> <span class="va">overlayColours</span>,</span>
 <span>  opacity <span class="op">=</span> <span class="fl">0.25</span>,</span>
@@ -83,10 +84,15 @@ plot.</p>
 (default), set to 10% of the plot width.</p></dd>
 
 
+<dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dd><p>Named list of custom overlay-specific properties to be edited in
+the overlay dropdown menu.</p></dd>
+
+
 <dt id="arg-snap">snap<a class="anchor" aria-label="anchor" href="#arg-snap"></a></dt>
 <dd><p>Function to "snap" overlay coordinates to a grid, or <code>"none"</code>
 (default) for no snapping. See details for how to specify the snap
-function.</p></dd>
+function; you can also use the built-in <code><a href="snap_grid.html">snap_grid()</a></code>.</p></dd>
 
 
 <dt id="arg-colours">colours<a class="anchor" aria-label="anchor" href="#arg-colours"></a></dt>
@@ -123,63 +129,7 @@ debugging purposes.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">shiny::reactiveValues()</a></code> object with the following named fields:</p><dl><dt>n</dt>
-<dd><p>Number of overlays (read-only).</p></dd>
-
-<dt>active</dt>
-<dd><p>Logical vector of length <code>n</code>; indicates which overlays are active.</p></dd>
-
-<dt>show</dt>
-<dd><p>Logical vector; controls whether overlays are visible.</p></dd>
-
-<dt>editing</dt>
-<dd><p>Index of the overlay currently being edited via the
-dropdown menu, if any; <code>NA</code> otherwise (read-only).</p></dd>
-
-<dt>last</dt>
-<dd><p>Index of the most recently added overlay (read-only).</p></dd>
-
-<dt>snap</dt>
-<dd><p>Coordinate snapping function.</p></dd>
-
-<dt>px, pw</dt>
-<dd><p>Numeric vector; overlay x-position and width in pixels (see note).</p></dd>
-
-<dt>py, ph</dt>
-<dd><p>Numeric vector; overlay y-position and height in pixels (read-only).</p></dd>
-
-<dt>cx0, cx1</dt>
-<dd><p>Numeric vector; overlay x-bounds in plot coordinates (see note).</p></dd>
-
-<dt>label</dt>
-<dd><p>Character vector of labels shown at the top of each overlay.</p></dd>
-
-<dt>outputId</dt>
-<dd><p>The output ID of the plot display area (read-only).</p></dd>
-
-<dt>bound_cx, bound_cw</dt>
-<dd><p>x-position and width of the bounding area in plot coordinates (read-only).</p></dd>
-
-<dt>bound_px, bound_pw</dt>
-<dd><p>x-position and width of the bounding area in pixels (read-only).</p></dd>
-
-<dt>bound_py, bound_ph</dt>
-<dd><p>y-position and height of the bounding area in pixels (read-only).</p></dd>
-
-<dt>stagger</dt>
-<dd><p>Amount of vertical staggering, as proportion of height.</p></dd>
-
-<dt>style</dt>
-<dd><p>Named list of character vectors; additional styling for rectangular overlays.</p></dd>
-
-<dt>update_cx(i)</dt>
-<dd><p>Function to update <code>cx0</code>/<code>cx1</code> from <code>px</code>/<code>pw</code> for overlays <code>i</code> (see note).</p></dd>
-
-<dt>update_px(i)</dt>
-<dd><p>Function to update <code>px</code>/<code>pw</code> from <code>cx0</code>/<code>cx1</code> for overlays <code>i</code> (see note).</p></dd>
-
-
-</dl><p>Note: Fields marked "read-only" above should not be changed. Other fields can
+    <p>A <code><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">shiny::reactiveValues()</a></code> object with the following named fields:</p><table class="table table"><tr><td><code>n</code></td><td>Number of overlays (read-only).</td></tr><tr><td><code>show</code></td><td><code>TRUE</code>/<code>FALSE</code>; controls whether overlays are visible.</td></tr><tr><td><code>active</code></td><td>Logical vector of length <code>n</code>; indicates which overlays are active.</td></tr><tr><td><code>label</code></td><td>Character vector of labels shown at the top of each overlay.</td></tr><tr><td><code>data</code></td><td>Custom data for each overlay, to be edited via the dropdown menu.</td></tr><tr><td><code>editing</code></td><td>Index of the overlay currently being edited via the dropdown menu; <code>NA</code> if none (read-only).</td></tr><tr><td><code>last</code></td><td>Index of the most recently added overlay (read-only).</td></tr><tr><td><code>snap</code></td><td>Coordinate snapping function.</td></tr><tr><td><code>px,pw</code></td><td>Numeric vector; overlay x-position and width in pixels (see note).</td></tr><tr><td><code>py,ph</code></td><td>Numeric vector; overlay y-position and height in pixels (read-only).</td></tr><tr><td><code>cx0,cx1</code></td><td>Numeric vector; overlay x-bounds in plot coordinates (see note).</td></tr><tr><td><code>outputId</code></td><td>The output ID of the plot display area (read-only).</td></tr><tr><td><code>bound_cx, bound_cw</code></td><td>x-position and width of the bounding area in plot coordinates (read-only).</td></tr><tr><td><code>bound_px, bound_pw</code></td><td>x-position and width of the bounding area in pixels (read-only).</td></tr><tr><td><code>bound_py, bound_ph</code></td><td>y-position and height of the bounding area in pixels (read-only).</td></tr><tr><td><code>stagger</code></td><td>Amount of vertical staggering, as proportion of height.</td></tr><tr><td><code>style</code></td><td>Named list of character vectors; additional styling for rectangular overlays.</td></tr><tr><td><code>update_cx(i)</code></td><td>Function to update <code>cx0</code>/<code>cx1</code> from <code>px</code>/<code>pw</code> for overlays <code>i</code> (see note).</td></tr><tr><td><code>update_px(i)</code></td><td>Function to update <code>px</code>/<code>pw</code> from <code>cx0</code>/<code>cx1</code> for overlays <code>i</code> (see note).</td></tr></table><p>Note: Fields marked "read-only" above should not be changed. Other fields can
 be changed in your reactive code and this will modify the overlays and their
 properties. The fields <code>px</code> and <code>pw</code> which specify the pixel coordinates of
 each overlay can be modified, but any modifications should be placed in a
@@ -204,9 +154,13 @@ the examples and documentation, this object is typically called <code>ov</code>.
 <code>paste0(outputId, "_menu")</code>, which can be rendered using <code><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">shiny::renderUI()</a></code>.
 When a user clicks the overlay's dropdown icon, this menu becomes visible
 and can be populated with inputs for editing overlay-specific settings, e.g.
-labels or numeric parameters tied to that overlay.</p>
-<p>If you provide a coordinate snapping function (<code>snap</code> argument), it should
-have the signature <code>function(ov, i)</code> where <code>ov</code> is the
+labels or numeric parameters tied to that overlay. The expression in the
+call to <code><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">shiny::renderUI()</a></code> should return a (list of) Shiny input/output
+widgets. If you give the input widgets special IDs, the user can use those
+input widgets to directly modify certain properties of the overlays (see
+examples):</p>
+<table class="table table"><tr><td><strong><code>inputId</code></strong></td><td><strong>Modifies</strong></td></tr><tr><td><code>*_label</code></td><td>The label of the overlay currently being edited.</td></tr><tr><td><code>*_cx0</code></td><td>Starting x-coordinate of overlay.</td></tr><tr><td><code>*_cx1</code></td><td>Ending x-coordinate of overlay.</td></tr><tr><td><code>*_cx</code></td><td>X-position of overlay; this is like <code>cx0</code>, but also updates <code>cx1</code> to keep the same width.</td></tr><tr><td><code>*_cw</code></td><td>Width of overlay; this adjusts <code>cx1</code> so that the overlay has the given width.</td></tr><tr><td><code>*_XYZ</code></td><td>The corresponding entry "XYZ" in <code>data</code> for the overlay being edited.</td></tr><tr><td></td><td>Note: above, <code>*</code> stands for the <code>outputId</code> argument to <code>overlayServer()</code>.</td></tr></table><p>If you provide your own coordinate snapping function (<code>snap</code> argument), it
+should have the signature <code>function(ov, i)</code> where <code>ov</code> is the
 <code><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">shiny::reactiveValues()</a></code> object defining the overlays and their settings,
 and <code>i</code> is the set of indices for the rectangles to be updated. When the
 position of any of the overlays is changed, the snapping function will be
@@ -220,7 +174,8 @@ the x axis range of the plot changes, so it may be a good idea to provide
 one if the user might place an overlay onto the plot, but then change the x
 axis range of the plot such that the overlay is no longer visible. You can
 detect this by verifying whether the overlay rectangles are "out of bounds"
-at the top of your snapping function. See example below.</p>
+at the top of your snapping function. See the code for <code><a href="snap_grid.html">snap_grid()</a></code> for
+ideas.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -229,38 +184,18 @@ at the top of your snapping function. See example below.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example of a valid snapping function: snap to nearest round number and</span></span></span>
-<span class="r-in"><span><span class="co"># make sure the overlay is at least 2 units wide.</span></span></span>
-<span class="r-in"><span><span class="va">mysnap</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">ov</span>, <span class="va">i</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="co"># remove any "out of bounds" overlays</span></span></span>
-<span class="r-in"><span>    <span class="va">oob</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">n</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">i</span> <span class="op">&amp;</span></span></span>
-<span class="r-in"><span>        <span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">cx0</span> <span class="op">&lt;</span> <span class="va">ov</span><span class="op">$</span><span class="va">bound_cx</span> <span class="op">|</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx1</span> <span class="op">&gt;</span> <span class="va">ov</span><span class="op">$</span><span class="va">bound_cx</span> <span class="op">+</span> <span class="va">ov</span><span class="op">$</span><span class="va">bound_cw</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">ov</span><span class="op">$</span><span class="va">active</span><span class="op">[</span><span class="va">oob</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># adjust position and with</span></span></span>
-<span class="r-in"><span>    <span class="va">widths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">cx1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">bound_cx</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">bound_cx</span> <span class="op">+</span> <span class="va">ov</span><span class="op">$</span><span class="va">bound_cw</span><span class="op">)</span> <span class="op">-</span> <span class="va">widths</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">ov</span><span class="op">$</span><span class="va">cx1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">bound_cx</span> <span class="op">+</span> <span class="va">ov</span><span class="op">$</span><span class="va">bound_cw</span><span class="op">)</span>, <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">+</span> <span class="va">widths</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"my_plot"</span>, <span class="fl">640</span>, <span class="fl">480</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="overlayToken.html">overlayToken</a></span><span class="op">(</span><span class="st">"add"</span>, <span class="st">"Raise"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="co"># further UI elements here . . .</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu">overlayServer</span><span class="op">(</span><span class="st">"my_plot"</span>, <span class="fl">4</span>, <span class="fl">1</span>, snap <span class="op">=</span> <span class="va">mysnap</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu">overlayServer</span><span class="op">(</span><span class="st">"my_plot"</span>, <span class="fl">4</span>, <span class="fl">1</span>, snap <span class="op">=</span> <span class="fu"><a href="snap_grid.html">snap_grid</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">my_plot_menu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span></span>
 <span class="r-in"><span>        <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">editing</span><span class="op">)</span></span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textInput.html" class="external-link">textInput</a></span><span class="op">(</span><span class="st">"label_input"</span>, <span class="st">"Overlay label"</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">label_input</span>, <span class="op">{</span></span></span>
-<span class="r-in"><span>        <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">editing</span><span class="op">)</span></span></span>
-<span class="r-in"><span>        <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">label_input</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/textInput.html" class="external-link">textInput</a></span><span class="op">(</span><span class="st">"my_plot_label"</span>, <span class="st">"Overlay label"</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">my_plot</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span></span>
