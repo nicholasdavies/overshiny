@@ -1,6 +1,7 @@
 # overshiny (development version)
 
 * Simplified use of overlay dropdown menus.
+* Added a new vignette on infectious disease modelling with overlays.
 
 # overshiny 0.1.1
 
