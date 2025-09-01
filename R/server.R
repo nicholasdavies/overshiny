@@ -17,10 +17,25 @@
 #' `paste0(outputId, "_menu")`, which can be rendered using [shiny::renderUI()].
 #' When a user clicks the overlay's dropdown icon, this menu becomes visible
 #' and can be populated with inputs for editing overlay-specific settings, e.g.
-#' labels or numeric parameters tied to that overlay.
+#' labels or numeric parameters tied to that overlay. The expression in the
+#' call to [shiny::renderUI()] should return a (list of) Shiny input/output
+#' widgets. If you give the input widgets special IDs, the user can use those
+#' input widgets to directly modify certain properties of the overlays (see
+#' examples):
 #'
-#' If you provide a coordinate snapping function (`snap` argument), it should
-#' have the signature `function(ov, i)` where `ov` is the
+#' \tabular{ll}{
+#' **`inputId`** \tab **Modifies** \cr
+#' \code{*_label} \tab The label of the overlay currently being edited. \cr
+#' \code{*_cx0} \tab Starting x-coordinate of overlay. \cr
+#' \code{*_cx1} \tab Ending x-coordinate of overlay. \cr
+#' \code{*_cx} \tab X-position of overlay; this is like `cx0`, but also updates `cx1` to keep the same width. \cr
+#' \code{*_cw} \tab Width of overlay; this adjusts `cx1` so that the overlay has the given width. \cr
+#' \code{*_XYZ} \tab The corresponding entry "XYZ" in `data` for the overlay being edited. \cr
+#' \tab Note: above, `*` stands for the `outputId` argument to `overlayServer()`.
+#' }
+#'
+#' If you provide your own coordinate snapping function (`snap` argument), it
+#' should have the signature `function(ov, i)` where `ov` is the
 #' [shiny::reactiveValues()] object defining the overlays and their settings,
 #' and `i` is the set of indices for the rectangles to be updated. When the
 #' position of any of the overlays is changed, the snapping function will be
@@ -34,15 +49,18 @@
 #' one if the user might place an overlay onto the plot, but then change the x
 #' axis range of the plot such that the overlay is no longer visible. You can
 #' detect this by verifying whether the overlay rectangles are "out of bounds"
-#' at the top of your snapping function. See example below.
+#' at the top of your snapping function. See the code for [snap_grid()] for
+#' ideas.
 #'
 #' @param outputId The ID of the plot output (as used in [overlayPlotOutput()]).
 #' @param nrect Number of overlay rectangles to support.
 #' @param width Optional default overlay width in plot coordinates. If `NULL`
 #'     (default), set to 10% of the plot width.
+#' @param data Named list of custom overlay-specific properties to be edited in
+#'     the overlay dropdown menu.
 #' @param snap Function to "snap" overlay coordinates to a grid, or `"none"`
 #'     (default) for no snapping. See details for how to specify the snap
-#'     function.
+#'     function; you can also use the built-in [snap_grid()].
 #' @param colours A function to assign custom colours to the overlays. Should
 #'     be a function that takes a single integer (the number of overlays) and
 #'     returns colours in hexadecimal notation (e.g. "#FF0000"). Do not provide
@@ -59,26 +77,26 @@
 #'     debugging purposes.
 #'
 #' @return A [shiny::reactiveValues()] object with the following named fields:
-#' \describe{
-#'   \item{n}{Number of overlays (read-only).}
-#'   \item{active}{Logical vector of length `n`; indicates which overlays are active.}
-#'   \item{show}{Logical vector; controls whether overlays are visible.}
-#'   \item{editing}{Index of the overlay currently being edited via the
-#'       dropdown menu, if any; `NA` otherwise (read-only).}
-#'   \item{last}{Index of the most recently added overlay (read-only).}
-#'   \item{snap}{Coordinate snapping function.}
-#'   \item{px, pw}{Numeric vector; overlay x-position and width in pixels (see note).}
-#'   \item{py, ph}{Numeric vector; overlay y-position and height in pixels (read-only).}
-#'   \item{cx0, cx1}{Numeric vector; overlay x-bounds in plot coordinates (see note).}
-#'   \item{label}{Character vector of labels shown at the top of each overlay.}
-#'   \item{outputId}{The output ID of the plot display area (read-only).}
-#'   \item{bound_cx, bound_cw}{x-position and width of the bounding area in plot coordinates (read-only).}
-#'   \item{bound_px, bound_pw}{x-position and width of the bounding area in pixels (read-only).}
-#'   \item{bound_py, bound_ph}{y-position and height of the bounding area in pixels (read-only).}
-#'   \item{stagger}{Amount of vertical staggering, as proportion of height.}
-#'   \item{style}{Named list of character vectors; additional styling for rectangular overlays.}
-#'   \item{update_cx(i)}{Function to update `cx0`/`cx1` from `px`/`pw` for overlays `i` (see note).}
-#'   \item{update_px(i)}{Function to update `px`/`pw` from `cx0`/`cx1` for overlays `i` (see note).}
+#' \tabular{ll}{
+#' \code{n} \tab Number of overlays (read-only). \cr
+#' \code{show} \tab `TRUE`/`FALSE`; controls whether overlays are visible. \cr
+#' \code{active} \tab Logical vector of length `n`; indicates which overlays are active. \cr
+#' \code{label} \tab Character vector of labels shown at the top of each overlay. \cr
+#' \code{data} \tab Custom data for each overlay, to be edited via the dropdown menu. \cr
+#' \code{editing} \tab Index of the overlay currently being edited via the dropdown menu; `NA` if none (read-only). \cr
+#' \code{last} \tab Index of the most recently added overlay (read-only). \cr
+#' \code{snap} \tab Coordinate snapping function. \cr
+#' \code{px,pw} \tab Numeric vector; overlay x-position and width in pixels (see note). \cr
+#' \code{py,ph} \tab Numeric vector; overlay y-position and height in pixels (read-only). \cr
+#' \code{cx0,cx1} \tab Numeric vector; overlay x-bounds in plot coordinates (see note). \cr
+#' \code{outputId} \tab The output ID of the plot display area (read-only). \cr
+#' \code{bound_cx, bound_cw} \tab x-position and width of the bounding area in plot coordinates (read-only). \cr
+#' \code{bound_px, bound_pw} \tab x-position and width of the bounding area in pixels (read-only). \cr
+#' \code{bound_py, bound_ph} \tab y-position and height of the bounding area in pixels (read-only). \cr
+#' \code{stagger} \tab Amount of vertical staggering, as proportion of height. \cr
+#' \code{style} \tab Named list of character vectors; additional styling for rectangular overlays. \cr
+#' \code{update_cx(i)} \tab Function to update `cx0`/`cx1` from `px`/`pw` for overlays `i` (see note). \cr
+#' \code{update_px(i)} \tab Function to update `px`/`pw` from `cx0`/`cx1` for overlays `i` (see note).
 #' }
 #'
 #' Note: Fields marked "read-only" above should not be changed. Other fields can
@@ -95,21 +113,6 @@
 #' the overlay(s) to be updated.
 #'
 #' @examples
-#' # Example of a valid snapping function: snap to nearest round number and
-#' # make sure the overlay is at least 2 units wide.
-#' mysnap <- function(ov, i) {
-#'     # remove any "out of bounds" overlays
-#'     oob <- seq_len(ov$n) %in% i &
-#'         (ov$cx0 < ov$bound_cx | ov$cx1 > ov$bound_cx + ov$bound_cw)
-#'     ov$active[oob] <- FALSE
-#'
-#'     # adjust position and with
-#'     widths <- pmax(2, round(ov$cx1[i] - ov$cx0[i]))
-#'     ov$cx0[i] <- pmax(round(ov$bound_cx),
-#'         pmin(round(ov$bound_cx + ov$bound_cw) - widths, round(ov$cx0[i])))
-#'     ov$cx1[i] <- pmin(round(ov$bound_cx + ov$bound_cw), ov$cx0[i] + widths)
-#' }
-#'
 #' ui <- shiny::fluidPage(
 #'     overlayPlotOutput("my_plot", 640, 480),
 #'     overlayToken("add", "Raise")
@@ -117,16 +120,11 @@
 #' )
 #'
 #' server <- function(input, output) {
-#'     ov <- overlayServer("my_plot", 4, 1, snap = mysnap)
+#'     ov <- overlayServer("my_plot", 4, 1, snap = snap_grid())
 #'
 #'     output$my_plot_menu <- renderUI({
 #'         i <- req(ov$editing)
-#'         textInput("label_input", "Overlay label", value = ov$label[i])
-#'     })
-#'
-#'     observeEvent(input$label_input, {
-#'         i <- req(ov$editing)
-#'         ov$label[i] <- input$label_input
+#'         textInput("my_plot_label", "Overlay label", value = ov$label[i])
 #'     })
 #'
 #'     output$my_plot <- shiny::renderPlot({
@@ -148,9 +146,9 @@
 #' @seealso [overlayPlotOutput()], [overlayBounds()]
 #'
 #' @export
-overlayServer = function(outputId, nrect, width = NULL, snap = "none",
-    colours = overlayColours, opacity = 0.25, icon = shiny::icon("gear"),
-    stagger = 0.045, style = list(), debug = FALSE)
+overlayServer = function(outputId, nrect, width = NULL, data = NULL,
+    snap = "none", colours = overlayColours, opacity = 0.25,
+    icon = shiny::icon("gear"), stagger = 0.045, style = list(), debug = FALSE)
 {
     session = shiny::getDefaultReactiveDomain()
     input = session$input
@@ -174,6 +172,22 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
             old_inputs(current)
         })
     }
+
+    # Validate data parameter
+    if (length(data) > 0 &&
+            (!is.list(data) || is.null(names(data)) ||
+            any(is.na(names(data))) || any(names(data) == ""))) {
+        stop("Data must be a named list or NULL.")
+    }
+    data = lapply(data, function(x) {
+        if (length(x) == 1) {
+            rep(x, nrect)
+        } else if (length(x) == nrect) {
+            x
+        } else {
+            stop("All elements of data must be either length 1 or length nrect (", nrect, ").")
+        }
+    })
 
     # ---------- GLOBAL SETUP ----------
 
@@ -211,8 +225,10 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
     # Set up overlays
     ov = shiny::reactiveValues(
         n         = nrect,          # number of overlays
-        active    = rep(F, nrect),  # is the overlay active
         show      = TRUE,           # show overlays?
+        active    = rep(F, nrect),  # is the overlay active
+        label     = rep("", nrect), # label at top of overlay
+        data      = data,           # user settings
         editing   = NA,             # which overlay is currently being edited via dropdown
         last      = NA,             # which overlay was last to be added
         snap      = snap,           # coordinate snapping function
@@ -222,7 +238,6 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
         ph        = rep(0, nrect),  # pixel height of overlay
         cx0       = rep(0, nrect),  # left x coord of overlay
         cx1       = rep(1, nrect),  # right x coord of overlay
-        label     = rep("", nrect), # label at top of overlay
         outputId  = outputId,       # id of display/bounds
         bound_cx  = 0,              # x-pos of bounds in coords (set by overlayBounds)
         bound_cw  = 0,              # width of bounds in coords (set by overlayBounds)
@@ -287,6 +302,60 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
         ov$update_px()
     })
 
+    # Dropdown menu
+    menuId = paste(outputId, "menu", sep = "_")
+
+    # Observe menu-related input changes
+    hold_off = FALSE
+    data_head = paste0("^", outputId, "_")
+    shiny::observe({
+        i = shiny::req(ov$editing)
+
+        # I put this in because this observer was running before
+        # renderUI for the menu, which was causing the next overlay to
+        # adopt the previous overlay's values when the dropdown button was
+        # pressed. TODO, fix this.
+        if (hold_off) {
+            hold_off <<- FALSE
+            shiny::invalidateLater(100)
+            return (NULL)
+        }
+
+        names = names(input)
+        names = names[grepl(data_head, names)]
+        for (nm in names) {
+            input[[nm]] # take dependency
+            inm = stringr::str_remove(nm, data_head)
+            if (inm == "label") {
+                ov$label[[i]] = input[[nm]]
+            } else if (inm == "cx0") {
+                shiny::isolate({
+                    ov$cx0[[i]] = input[[nm]]
+                    ov$update_px(i)
+                })
+            } else if (inm == "cx1") {
+                shiny::isolate({
+                    ov$cx1[[i]] = input[[nm]]
+                    ov$update_px(i)
+                })
+            } else if (inm == "cx") {
+                shiny::isolate({
+                    w = ov$cx1[[i]] - ov$cx0[[i]]
+                    ov$cx0[[i]] = input[[nm]]
+                    ov$cx1[[i]] = input[[nm]] + w
+                    ov$update_px(i)
+                })
+            } else if (inm == "cw") {
+                shiny::isolate({
+                    ov$cx1[[i]] = ov$cx0[[i]] + input[[nm]]
+                    ov$update_px(i)
+                })
+            } else if (!is.null(ov$data[[inm]])) {
+                ov$data[[inm]][[i]] = input[[nm]]
+            }
+        }
+    })
+
     # Close all dropdowns and their contents
     clear_dropdowns = function() {
         setcss(ovmatch("dropdown", outputId), display = "none")
@@ -319,11 +388,11 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
             clear_dropdowns()
             # Insert and make visible new dropdown
             if (!isTRUE(shiny::isolate(ov$editing) == i)) {
+                ov$editing = i;
                 shiny::isolate({
-                    ov$editing = i;
                     insert_ui(ovid("dropdown", outputId, i),
                         ui = htmltools::div(id = ovid("menu"),
-                            shiny::uiOutput(paste(outputId, "menu", sep = "_")),
+                            shiny::uiOutput(menuId),
                             shiny::actionButton(inputId = "int_remove", label = "Remove",
                                 icon = shiny::icon("trash"), class = "overshiny-remove",
                                 `data-id` = ovid("overlay", outputId, i)
@@ -332,6 +401,7 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
                     );
                 })
                 setcss(ovid("dropdown", outputId, i), display = "block")
+                hold_off <<- TRUE;
             } else {
                 ov$editing = NA;
             }
@@ -368,6 +438,11 @@ overlayServer = function(outputId, nrect, width = NULL, snap = "none",
                 ov$update_cx(i);
                 ov$active[i] = TRUE;
                 ov$label[i] = input[[drop_event]]$label;
+
+                # Reset data
+                for (nm in names(ov$data)) {
+                    ov$data[[nm]][[i]] = data[[nm]][[i]]
+                }
 
                 # Position overlay
                 setcss(ovid("overlay", outputId, i),
