@@ -40,10 +40,13 @@ the simulation code before putting it into an app, which often makes it
 harder to catch errors. So let's start with our infectious disease model
 in `epidemics` and move on to the `shiny` app later on.
 
-First, make sure you have the `epidemics` package installed:
+First, make sure you have the `epidemics` package installed, and the most 
+recent version of `overshiny` (the version on CRAN is not recent enough for
+this tutorial!):
 
 ```{r, eval = FALSE}
 devtools::install_github("epiverse-trace/epidemics")
+devtools::install_github("nicholasdavies/overshiny")
 ```
 
 Now, let's build a simple function that will produce a simulation run
