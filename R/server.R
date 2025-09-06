@@ -393,7 +393,7 @@ overlayServer = function(outputId, nrect, width = NULL, data = NULL,
                     insert_ui(ovid("dropdown", outputId, i),
                         ui = htmltools::div(id = ovid("menu"),
                             shiny::uiOutput(menuId),
-                            shiny::actionButton(inputId = "int_remove", label = "Remove",
+                            shiny::actionLink(inputId = "int_remove", label = "Remove",
                                 icon = shiny::icon("trash"), class = "overshiny-remove",
                                 `data-id` = ovid("overlay", outputId, i)
                             )

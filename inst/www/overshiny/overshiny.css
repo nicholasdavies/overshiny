@@ -104,8 +104,9 @@ body *:not(script):not(style):not(head) {
 
 /* For remove button in overlay settings */
 .overshiny-remove {
+    /* From when this was a button.
     border-radius: 5px;
-    padding: 3px 7px
+    padding: 3px 7px*/
 }
 
 /* To not allow text highlighting or long-press callouts on iOS */
