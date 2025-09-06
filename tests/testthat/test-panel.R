@@ -1,4 +1,7 @@
 test_that("panel_rects_ggplot works", {
+    # suppress creation of Rplots.pdf
+    pdf(NULL)
+
     plot <- ggplot2::ggplot(mtcars) +
         ggplot2::geom_point(ggplot2::aes(x = mpg, y = disp)) +
         ggplot2::facet_wrap(~cyl)
