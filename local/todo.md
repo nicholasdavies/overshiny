@@ -2,15 +2,15 @@
 
 Overlay dropdowns:
 x make remove button look nicer (actionLink instead?)
-- automatic label of start/end date/time. Could use e.g. heading arg to
+x automatic label of start/end date/time. Could use e.g. heading arg to
   overlayServer, with TRUE, FALSE, or some kind of function that would operate 
   on ov and i.
-- automatic dropdown for label. Appears below heading. Perhaps argument would
-  be `select` or similar to overlayServer. FALSE for none, TRUE for yes to 
+x automatic inputSelect for label. Appears below heading. Perhaps argument would
+  be `select` or similar to overlayServer. NULL for none, TRUE for yes to 
   include a dropdown to select the overlay label from possible labels. A 
   question then is how to automatically include all the types. Anyway, when 
   this is changed, label is changed, etc.
-- extra argument to overlayServer which would be a 'menu' argument. This would
+x extra argument to overlayServer which would be a 'menu' argument. This would
   be a function of ov and i, like heading, snap, etc, which would return some
   ui components as a function of ov and i. This would be used in the package
   to inject the UI using insertUI rather than renderUI. I think that would 

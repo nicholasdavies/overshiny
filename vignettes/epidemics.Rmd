@@ -40,9 +40,9 @@ the simulation code before putting it into an app, which often makes it
 harder to catch errors. So let's start with our infectious disease model
 in `epidemics` and move on to the `shiny` app later on.
 
-First, make sure you have the `epidemics` package installed, and the most 
-recent version of `overshiny` (the version on CRAN is not recent enough for
-this tutorial!):
+First, make sure you have the `epidemics` package installed, and the
+most recent version of `overshiny` (the version on CRAN is not recent
+enough for this tutorial!):
 
 ```{r, eval = FALSE}
 devtools::install_github("epiverse-trace/epidemics")
@@ -85,8 +85,11 @@ if you can plot the prevalence of infection (compartment `"infectious"`)
 before continuing.
 
 <details>
+
 <summary>Click for one possible answer...</summary>
+
 Here's how you might do it using `ggplot2`:
+
 ```{r eval=FALSE}
 results <- run_model()
 results <- results[results$compartment == "infectious", ]
@@ -94,21 +97,25 @@ ggplot(results) +
     geom_line(aes(x = time, y = value)) +
     labs(x = NULL, y = "Infection prevalence")
 ```
-You should see an exponentially growing epidemic (with a little dip at the start).
-</details> 
 
-## Connecting to a mock-up of `input` 
+You should see an exponentially growing epidemic (with a little dip at
+the start).
 
-At the moment, our `run_model()` function produces an epidemic curve based on
-some default parameters. We want `run_model()` to respond to user input, though,
-so that users of our app can provide parameters like the basic reproduction
-number <i>R</i><sub>0</sub>, the infectious period, the duration of the 
-epidemic, and so on.
+</details>
 
-Within `shiny`, user input is provided in a list^[Technically it's not a list,
-it's a `shiny::reactiveValues()` object, but in many ways it behaves like a 
-normal R list.] called `input`. So let's say that the `input` list contains the 
-following:
+## Connecting to a mock-up of `input`
+
+At the moment, our `run_model()` function produces an epidemic curve
+based on some default parameters. We want `run_model()` to respond to
+user input, though, so that users of our app can provide parameters like
+the basic reproduction number <i>R</i><sub>0</sub>, the infectious
+period, the duration of the epidemic, and so on.
+
+Within `shiny`, user input is provided in a list[^1] called `input`. So
+let's say that the `input` list contains the following:
+
+[^1]: Technically it's not a list, it's a `shiny::reactiveValues()`
+    object, but in many ways it behaves like a normal R list.
 
 ```{r eval=FALSE}
 input <- list(
@@ -127,23 +134,27 @@ input <- list(
 )
 ```
 
-Note that in the above, we have specified lots of the parameters in "natural"
-units -- the population size is in millions, the initial proportion of
-infected people is in percent (not a proportion), and we specify an infectious
-period in days rather than a recovery rate in days<sup>-1</sup>. Also, rather
-than specifying a total duration for the epidemic in days, we have specified a
-start date and end date for the epidemic. This is because we're going to 
-develop our Shiny app with end users in mind, and they may not be used to the 
-more mathematically tractable units that infectious disease modellers use.
+Note that in the above, we have specified lots of the parameters in
+"natural" units -- the population size is in millions, the initial
+proportion of infected people is in percent (not a proportion), and we
+specify an infectious period in days rather than a recovery rate in
+days<sup>-1</sup>. Also, rather than specifying a total duration for the
+epidemic in days, we have specified a start date and end date for the
+epidemic. This is because we're going to develop our Shiny app with end
+users in mind, and they may not be used to the more mathematically
+tractable units that infectious disease modellers use.
 
-By looking at the documentation for `epidemics::population()` and 
-`epidemics::model_default()`, can you rewrite the `run_model()` function so
-that it sets all the relevant parameters from the `input` list above? Rewrite 
-it so that `input` is passed as an argument to `run_model()`.
+By looking at the documentation for `epidemics::population()` and
+`epidemics::model_default()`, can you rewrite the `run_model()` function
+so that it sets all the relevant parameters from the `input` list above?
+Rewrite it so that `input` is passed as an argument to `run_model()`.
 
 <details>
+
 <summary>Click for one possible answer...</summary>
+
 Here's how you might do it:
+
 ```{r eval=FALSE}
 # Model run function
 run_model <- function(input)
@@ -171,25 +182,28 @@ run_model <- function(input)
     return (results)
 }
 ```
+
 </details>
 
-Once you've done this, check that you're happy with the results before moving
-on.
+Once you've done this, check that you're happy with the results before
+moving on.
 
 # Shiny app skeleton
 
-Now, let's set our simulation code aside and put together a basic `shiny` app.
+Now, let's set our simulation code aside and put together a basic
+`shiny` app.
 
-All `shiny` apps have two parts. The first part is a `ui` or User Interface, 
-which determines how the app is laid out. This is where you define all the 
-components of the app, where they are, and what they look like. The second part
-is a `server` function, which is where the processing happens. The server is
-where you transform all the user inputs into outputs, and do any calculations
-that need to respond to user input.
+All `shiny` apps have two parts. The first part is a `ui` (user
+interface), which determines how the app is laid out. This is where you
+define all the components of the app, where they are, and what they look
+like. The second part is a `server` function, which is where the
+processing happens. The server is where you transform all the user
+inputs into outputs, and do any calculations that need to respond to
+user input.
 
-Let's start with a really basic skeleton for our `shiny` app. This can go in
-a new `.R` script file, but don't get rid of your old code from the last 
-section as we'll put it back in later.
+Let's start with a really basic skeleton for our `shiny` app. This can
+go in a new `.R` script file, but don't get rid of your old code from
+the last section as we'll put it back in later.
 
 ```{r, eval = FALSE}
 library(epidemics)
@@ -227,13 +241,13 @@ server <- function(input, output)
 shinyApp(ui, server)
 ```
 
-Put all that in a script and run it. You should see a window pop up with a big
-title that says "SEIRV model with interventions", and three smaller titles
-underneath.
+Put all that in a script and run it. You should see a window pop up with
+a big title that says "SEIRV model with interventions", and three
+smaller titles underneath.
 
-Even though this is a very basic app, there's a lot to unpick here. In 
-particular, the large part of the script that generates the user interface has
-a lot going on. Let's take it step by step.
+Even though this is a very basic app, there's a lot to unpick here. In
+particular, the large part of the script that generates the user
+interface has a lot going on. Let's take it step by step.
 
 ```{r, eval = FALSE}
 # --- User interface ---
@@ -242,24 +256,26 @@ ui <- fluidPage(
 )
 ```
 
-In `shiny`, the user interface is constructed of nested function calls. This 
-mirrors the nested structure of a web page -- so e.g. here the `fluidPage`
-contains several elements, which themselves may contain several other elements.
-`fluidPage` is just one option for the top-level element; others include
-`fixedPage` or `basicPage`. `fluidPage` is a flexible layout that can
-dynamically rearrange the elements if someone is using your app on a smaller
-screen, like on a mobile phone, so it's handy to use.
+In `shiny`, the user interface is constructed of nested function calls.
+This mirrors the nested structure of a web page -- so e.g. here the
+`fluidPage` contains several elements, which themselves may contain
+several other elements. `fluidPage` is just one option for the top-level
+element; others include `fixedPage` or `basicPage`. `fluidPage` is a
+flexible layout that can dynamically rearrange the elements if someone
+is using your app on a smaller screen, like on a mobile phone, so it's
+handy to use.
 
-To make use of this dynamic rearrangement, a `fluidPage` is divided into rows,
-which are defined using the `shiny` function `fluidRow`. In turn, each 
-`fluidRow` is divided into columns (with the `shiny` function `column`). Each
-`column` within a `fluidRow` has a width, and the width of all the columns 
-in a row together should add up to 12. (In a `fluidRow`, columns can only
-have whole-number widths.) They chose 12 as the total width of a row because it 
-divides well into 1, 2, 3, 4, or 6 columns. On a computer screen, normally you 
-will see the `fluidRow` all in one actual row, but if you are looking at your 
-Shiny app on a smaller screen, like on a phone, you might see your `fluidRow` 
-broken up across multiple actual rows. 
+To make use of this dynamic rearrangement, a `fluidPage` is divided into
+rows, which are defined using the `shiny` function `fluidRow`. In turn,
+each `fluidRow` is divided into columns (with the `shiny` function
+`column`). Each `column` within a `fluidRow` has a width, and the width
+of all the columns in a row together should add up to 12. (In a
+`fluidRow`, columns can only have whole-number widths.) They chose 12 as
+the total width of a row because it divides well into 1, 2, 3, 4, or 6
+columns. On a computer screen, normally you will see the `fluidRow` all
+in one actual row, but if you are looking at your Shiny app on a smaller
+screen, like on a phone, you might see your `fluidRow` broken up across
+multiple actual rows.
 
 As an example, if your `shiny` ui contains:
 
@@ -272,16 +288,23 @@ fluidRow(
 ```
 
 then on a larger screen, you would see something like
+
+```{=html}
 <pre>part one     part two    part three  </pre>
+```
+
 while on a phone, you might see
+
+```{=html}
 <pre>part one
 part two
 part three</pre>
+```
 
-Arranging each part vertically on a small screen instead of horizontally 
-helps ensure that your content don't get too hard to see on a mobile device
-because it's all squished into one row, which is especially helpful if the 
-columns contain plots or other more complex elements.
+Arranging each part vertically on a small screen instead of horizontally
+helps ensure that your content don't get too hard to see on a mobile
+device because it's all squished into one row, which is especially
+helpful if the columns contain plots or other more complex elements.
 
 So, looking again at our whole UI definition:
 
@@ -310,28 +333,30 @@ ui <- fluidPage(
 )
 ```
 
-This defines a `fluidPage`. There is a `titlePanel` at the top; anything not 
-explicitly in a `fluidRow` takes up a whole row, so the title panel appears on 
-its own row. Then there is a `fluidRow`, which by definition has a total "width"
-of 12 units. It contains three `column`s each of size 4 (to add up to 12); the 
-size of the column is the first parameter to `column` and then all the elements 
-that should appear in the column are subsequent arguments. 
+This defines a `fluidPage`. There is a `titlePanel` at the top; anything
+not explicitly in a `fluidRow` takes up a whole row, so the title panel
+appears on its own row. Then there is a `fluidRow`, which by definition
+has a total "width" of 12 units. It contains three `column`s each of
+size 4 (to add up to 12); the size of the column is the first parameter
+to `column` and then all the elements that should appear in the column
+are subsequent arguments.
 
-Here, each column contains a header `h3` with some text. In HTML, `h1` through 
-`h6` define headers for sections, where `h1` is the biggest and `h6` is the 
-smallest. You don't need to start at `h1` and work your way down, and often 
-people select header levels (`h1` through `h6`) based on aesthetics (i.e. which 
-size looks right) rather than a strict logical ordering. We've gone based on
-aesthetics here; we could have used `h1` instead of `h3` but I think it looks
-too big (try it and see for yourself!). To be clear, there's no relationship 
-between the header level and the column size.
+Here, each column contains a header `h3` with some text. In HTML, `h1`
+through `h6` define headers for sections, where `h1` is the biggest and
+`h6` is the smallest. You don't need to start at `h1` and work your way
+down, and often people select header levels (`h1` through `h6`) based on
+aesthetics (i.e. which size looks right) rather than a strict logical
+ordering. We've gone based on aesthetics here; we could have used `h1`
+instead of `h3` but I think it looks too big (try it and see for
+yourself!). To be clear, there's no relationship between the header
+level and the column size.
 
 ## Adding input widgets
 
-Now we'll edit our Shiny app skeleton to have some more interesting things
-going on. Take a look at the code below. We have added new elements to the 
-three columns we had before. After you've looked at these, run this entire
-following script:
+Now we'll edit our Shiny app skeleton to have some more interesting
+things going on. Take a look at the code below. We have added new
+elements to the three columns we had before. After you've looked at
+these, run this entire following script:
 
 ```{r, eval = FALSE}
 library(epidemics)
@@ -376,25 +401,26 @@ server <- function(input, output)
 shinyApp(ui, server)
 ```
 
-Now we're getting somewhere! We've added some input widgets to the first two
-columns. `shiny` gives us `dateRangeInput()` to put in a range of dates (you 
-can use `dateInput()` for just one date); `numericInput()` to enter a number 
-using an input box (or `textInput()` for free text input); and `sliderInput()` 
-to enter a number using a slider--plus many more options. All of the input
-"widgets" provided by `shiny` are called `[something]Input()` and they follow 
-some common conventions: the first argument is a special ID which we'll use 
-later, the second argument is a label to show next to the input, and then the 
-other inputs define things like the starting value or the minimum and maximum. 
-For more information, consult the `shiny` manual with e.g. `?sliderInput`.
+Now we're getting somewhere! We've added some input widgets to the first
+two columns. `shiny` gives us `dateRangeInput()` to put in a range of
+dates (you can use `dateInput()` for just one date); `numericInput()` to
+enter a number using an input box (or `textInput()` for free text
+input); and `sliderInput()` to enter a number using a slider--plus many
+more options. All of the input "widgets" provided by `shiny` are called
+`[something]Input()` and they follow some common conventions: the first
+argument is a special ID which we'll use later, the second argument is a
+label to show next to the input, and then the other inputs define things
+like the starting value or the minimum and maximum. For more
+information, consult the `shiny` manual with e.g. `?sliderInput`.
 
 # Combining inputs and outputs
 
-Now what we want to do is combine our previous `run_model()` function with 
-these `shiny` inputs so that the inputs connect to the model. Also, we want to
-plot the results of the model. Let's do that now.
+Now what we want to do is combine our previous `run_model()` function
+with these `shiny` inputs so that the inputs connect to the model. Also,
+we want to plot the results of the model. Let's do that now.
 
-First, in a new file, paste in your `run_model()` function from before with the
-calls to `library` that we need. Nothing here is new:
+First, in a new file, paste in your `run_model()` function from before
+with the calls to `library` that we need. Nothing here is new:
 
 ```{r, eval = FALSE}
 library(shiny)
@@ -428,7 +454,8 @@ run_model <- function(input)
 }
 ```
 
-Underneath that, let's put in our user interface from before, with one addition:
+Underneath that, let's put in our user interface from before, with one
+addition:
 
 ```{r, eval = FALSE}
 # --- User interface ---
@@ -467,10 +494,10 @@ ui <- fluidPage(
 )
 ```
 
-The bit we added was a `plotOutput` call, which puts space in the app for a 
-plot (either `ggplot2` or base R plot) with the ID `"display"`. To connect this
-plot with the inputs, we need to add some code to our `server` function, so
-put this code underneath what you have already:
+The bit we added was a `plotOutput` call, which puts space in the app
+for a plot (either `ggplot2` or base R plot) with the ID `"display"`. To
+connect this plot with the inputs, we need to add some code to our
+`server` function, so put this code underneath what you have already:
 
 ```{r, eval=FALSE}
 # --- App logic ---
@@ -490,67 +517,76 @@ server <- function(input, output)
 shinyApp(ui, server)
 ```
 
-If you put all this together, you should have a working model that connects
-to the user input, where the epidemic curve changes depending on how you
-manipulate the various input controls.
+If you put all this together, you should have a working model that
+connects to the user input, where the epidemic curve changes depending
+on how you manipulate the various input controls.
 
-That handful of lines in `server` is doing a lot. First, note that we're 
-calling the `shiny` function `renderPlot`, and assigning the value to 
-`output$display`. The reason `output$display` exists is because we put a 
-`plotOutput` in the `shiny` UI with ID `"display"` -- this makes an entry in
-`output` called `display` which is ready to receive a plot from the server
-function. If in our UI, we had given our `plotOutput` a different ID, like:
+That handful of lines in `server` is doing a lot. First, note that we're
+calling the `shiny` function `renderPlot`, and assigning the value to
+`output$display`. The reason `output$display` exists is because we put a
+`plotOutput` in the `shiny` UI with ID `"display"` -- this makes an
+entry in `output` called `display` which is ready to receive a plot from
+the server function. If in our UI, we had given our `plotOutput` a
+different ID, like:
 
 ```{r, eval=FALSE}
     plotOutput("marmite", width = "100%", height = 400),
 ```
 
-then we would have to assign the results of a call to `renderPlot()` to 
+then we would have to assign the results of a call to `renderPlot()` to
 `output$marmite`.
 
-Within `renderPlot()`, the first argument is a bit of R code (in curly braces,
-`{}`) that should return a ggplot2 plot, or produce a base R plot. Finally,
-note that we are now passing the `shiny` input object `input` to `run_model()`.
-`run_model()` is expecting `input` to contain values named `date_range`, `R0`,
-and so on; because we have made all those input widgets in out UI above, 
-`input` automatically contains the values that have been entered.
+Within `renderPlot()`, the first argument is a bit of R code (in curly
+braces, `{}`) that should return a ggplot2 plot, or produce a base R
+plot. Finally, note that we are now passing the `shiny` input object
+`input` to `run_model()`. `run_model()` is expecting `input` to contain
+values named `date_range`, `R0`, and so on; because we have made all
+those input widgets in out UI above, `input` automatically contains the
+values that have been entered.
 
-OK. Before continuing, let's tidy up the output a little. First of all, the
-y-axis of the plot extends up into the millions, and numbers like "1e+06" are
-a little tough to interpret. Try changing the plotting code in the `server`
-function so that the plot y-axis is in thousands, and this is indicated on the 
-y-axis label.
+OK. Before continuing, let's tidy up the output a little. First of all,
+the y-axis of the plot extends up into the millions, and numbers like
+"1e+06" are a little tough to interpret. Try changing the plotting code
+in the `server` function so that the plot y-axis is in thousands, and
+this is indicated on the y-axis label.
 
-Second, the x-axis is currently in days from 0 to the duration of the epidemic, 
-but we are providing our `shiny` app with specific dates. Try making the x-axis
-show calendar dates instead of the number of days from the beginning of the
-epidemic. (Hint: you can use the `input` list here.)
+Second, the x-axis is currently in days from 0 to the duration of the
+epidemic, but we are providing our `shiny` app with specific dates. Try
+making the x-axis show calendar dates instead of the number of days from
+the beginning of the epidemic. (Hint: you can use the `input` list
+here.)
 
 <details>
+
 <summary>Click for one possible answer...</summary>
-Here's how you might make these changes to the `server` function just by 
+
+Here's how you might make these changes to the `server` function just by
 changing the call to `ggplot`:
+
 ```{r eval=FALSE}
 ggplot(results) +
     geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
     labs(x = NULL, y = "Infection prevalence (thousands)") +
     ylim(0, NA)
 ```
-</details> 
+
+</details>
 
 # Adding interventions with `overshiny`
 
-In the last part of this tutorial, let's finally connect our `shiny` app with
-`overshiny` so that we can deploy interventions such as social distancing and
-vaccination on our infectious disease transmission model. We're not going to 
-get into the fine details of how specifically to model these interventions, 
-this is more just to demonstrate how `overshiny` works in the context of the
-model we've developed.
+In the last part of this tutorial, let's finally connect our `shiny` app
+with `overshiny` so that we can deploy interventions such as social
+distancing and vaccination on our infectious disease transmission model.
+We're not going to get into the fine details of how specifically to
+model these interventions; this is more just to demonstrate how
+`overshiny` works in the context of the model we've developed.
 
 Starting from the code we developed in the last section:
 
 <details>
+
 <summary>Click for starter code...</summary>
+
 ```{r eval=FALSE}
 library(shiny)
 library(ggplot2)
@@ -633,7 +669,8 @@ server <- function(input, output)
 # --- Run app ---
 shinyApp(ui, server)
 ```
-</details> 
+
+</details>
 
 First, we now need to include the `overshiny` package with:
 
@@ -641,7 +678,7 @@ First, we now need to include the `overshiny` package with:
 library(overshiny)
 ```
 
-Second, we need to change our `plotOutput` plot in our UI to an 
+Second, we need to change our `plotOutput` plot in our UI to an
 `overlayPlotOutput` so that it can respond to overlays:
 
 ```{r, eval = FALSE}
@@ -649,8 +686,9 @@ Second, we need to change our `plotOutput` plot in our UI to an
     overlayPlotOutput("display", width = "100%", height = 400),
 ```
 
-Third, we need to add some `overlayToken()`s that can be dragged onto the plot.
-Let's put these into the currently-blank "Interventions" section of our UI:
+Third, we need to add some `overlayToken()`s that can be dragged onto
+the plot. Let's put these into the currently-blank "Interventions"
+section of our UI:
 
 ```{r, eval = FALSE}
         column(4,
@@ -662,7 +700,8 @@ Let's put these into the currently-blank "Interventions" section of our UI:
 ```
 
 Fourth, we need to initialize the overlay logic in our `server` function
-by putting a call to `overlayServer` at the top of the `server` function:
+by putting a call to `overlayServer` at the top of the `server`
+function:
 
 ```{r, eval = FALSE}
 # --- App logic ---
@@ -676,12 +715,12 @@ server <- function(input, output)
     # rest of code follows as normal...
 ```
 
-We need to provide `overlayServer` with the id of our `overlayPlot` (here, 
-`"display"`) and the maximum number of overlays to support.
+We need to provide `overlayServer` with the id of our `overlayPlot`
+(here, `"display"`) and the maximum number of overlays to support.
 
-And finally, we need to modify our call to `renderPlot()` in the `server` 
-function to tell `overshiny` more information about our plot. Where before we 
-had:
+And finally, we need to modify our call to `renderPlot()` in the
+`server` function to tell `overshiny` more information about our plot.
+Where before we had:
 
 ```{r, eval = FALSE}
     output$display <- renderPlot({
@@ -710,36 +749,39 @@ Now, we have:
     })
 ```
 
-There are two changes above. First, rather than returning the `ggplot()` plot,
-we save the plot in a variable called `plot`. Second, we pass this through
-`overlayBounds()`, which takes four key arguments:
+There are two changes above. First, rather than returning the `ggplot()`
+plot, we save the plot in a variable called `plot`. Second, we pass this
+through `overlayBounds()`, which takes four key arguments:
 
-* `ov`, the object returned by `overlayServer()`.
-* `plot`, the plot itself.
-* `xlim`, the x-coordinate limits of the plot.
-* `ylim`, the y-coordinate limits of the plot.
+-   `ov`, the object returned by `overlayServer()`.
+-   `plot`, the plot itself.
+-   `xlim`, the x-coordinate limits of the plot.
+-   `ylim`, the y-coordinate limits of the plot.
 
-`xlim` and `ylim` are not required, but because `ggplot` by default includes
-a bit of extra space on the axes (i.e. the x-axis doesn't start precisely at 
-the epidemic start date, but a little before to provide some visual padding), 
-providing these allows `overshiny` to restrict the overlays such that they can
-only move over the time span in which the epidemic is actually occurring. It's 
-similar for `ylim` (try removing the `xlim` and `ylim` arguments to 
-`overlayBounds` to see what happens.)
+`xlim` and `ylim` are not required, but because `ggplot` by default
+includes a bit of extra space on the axes (i.e. the x-axis doesn't start
+precisely at the epidemic start date, but a little before to provide
+some visual padding), providing these allows `overshiny` to restrict the
+overlays such that they can only move over the time span in which the
+epidemic is actually occurring. It's similar for `ylim` (try removing
+the `xlim` and `ylim` arguments to `overlayBounds` to see what happens.)
 
-`overlayBounds()` itself returns the `plot` object, so it should be the last
-line in your expression that you pass to `renderPlot()`.
+`overlayBounds()` itself returns the `plot` object, so it should be the
+last line in your expression that you pass to `renderPlot()`.
 
-You should now be able to drag the intervention tokens onto the plot, where
-they will become overlays that you can move around, resize, and remove by 
-clicking on the "gears" icon on each overlay (then the "remove" button). They 
-won't do anything yet to the epicurve yet, though; that's for the next section.
+You should now be able to drag the intervention tokens onto the plot,
+where they will become overlays that you can move around, resize, and
+remove by clicking on the "gears" icon on each overlay (then the
+"remove" button). They won't do anything yet to the epicurve yet,
+though; that's for the next section.
 
-If you've gotten stuck and your code isn't working, here's some code you could 
-have arrived at:
+If you've gotten stuck and your code isn't working, here's some code you
+could have arrived at:
 
 <details>
+
 <summary>Click for code...</summary>
+
 ```{r, eval = FALSE}
 library(shiny)
 library(ggplot2)
@@ -834,25 +876,27 @@ server <- function(input, output)
 # --- Run app ---
 shinyApp(ui, server)
 ```
+
 </details>
 
-That's how `overshiny` works; the rest of this tutorial is just about 
+That's how `overshiny` works; the rest of this tutorial is just about
 connecting `overshiny` with `epidemics` so that the overlays on the plot
 actually have an effect on the epidemic model.
 
 ## Making the interventions work
 
-The last piece of the puzzle is to make the interventions actually have an
-impact on the simulated epidemic. Already, we are using the function 
-`model_default()` from `epidemics` to run our model, and now we will use the 
-`intervention` and `vaccination` arguments to `model_default()` to make our 
-interventions work.
+The last piece of the puzzle is to make the interventions actually have
+an impact on the simulated epidemic. Already, we are using the function
+`model_default()` from `epidemics` to run our model, and now we will use
+the `intervention` and `vaccination` arguments to `model_default()` to
+make our interventions work.
 
 First, let's change `run_model()` so that it can pass on these extra
-parameters (`intervention` and `vaccination`) to `epidemics::model_default()`. 
-To do that, add a `...` to the list of parameters so that `run_model()` can 
-take other (arbitrarily-named) parameters and pass them on to `model_default()`, 
-like so (there are just two changes to make):
+parameters (`intervention` and `vaccination`) to
+`epidemics::model_default()`. To do that, add a `...` to the list of
+parameters so that `run_model()` can take other (arbitrarily-named)
+parameters and pass them on to `model_default()`, like so (there are
+just two changes to make):
 
 ```{r, eval = FALSE}
 # Model run function
@@ -870,9 +914,9 @@ run_model <- function(input, ...)  # <-- FIRST CHANGE HERE
     return (results)
 ```
 
-Now, let's modify the call to `renderPlot` so that it reads in what overlays 
-have been placed onto the plot, and fills out the `intervention` and 
-`vaccination` parameters accordingly.
+Now, let's modify the call to `renderPlot` so that it reads in what
+overlays have been placed onto the plot, and fills out the
+`intervention` and `vaccination` parameters accordingly.
 
 ```{r, eval = FALSE}
     output$display <- renderPlot({
@@ -922,9 +966,11 @@ have been placed onto the plot, and fills out the `intervention` and
     })
 ```
 
-
 <details>
-<summary>(Just in case, complete code for the whole script is here...)</summary>
+
+<summary>(Just in case, complete code for the whole script is
+here...)</summary>
+
 ```{r, eval = FALSE}
 library(shiny)
 library(ggplot2)
@@ -1054,6 +1100,7 @@ server <- function(input, output)
 # --- Run app ---
 shinyApp(ui, server)
 ```
+
 </details>
 
 Compare the new call to `renderPlot()` to what we had before, which was:
@@ -1079,12 +1126,12 @@ A lot has been added, so let's take it step by step. First:
         vax <- NULL
 ```
 
-Here, we create some variables that will hold details of the interventions to
-apply; `tx_int` (for interventions on the transmission rate) and `vax` (for
-a vaccination campaign).
+Here, we create some variables that will hold details of the
+interventions to apply; `tx_int` (for interventions on the transmission
+rate) and `vax` (for a vaccination campaign).
 
-Then, we process the overlay data from the `ov` object that is provided by
-`overlayServer()`:
+Then, we process the overlay data from the `ov` object that is provided
+by `overlayServer()`:
 
 ```{r, eval = FALSE}
         # Apply overlays as interventions
@@ -1108,33 +1155,35 @@ Then, we process the overlay data from the `ov` object that is provided by
         }
 ```
 
-`ov$active` is a logical vector, the same length as the maximum number of 
-overlays (here, 8), which is `TRUE` for overlays that are on the plot and 
-`FALSE` for overlays that aren't. So `for (i in which(ov$active))` runs a loop
-for all indices `i` that correspond to an "active" overlay.
+`ov$active` is a logical vector, the same length as the maximum number
+of overlays (here, 8), which is `TRUE` for overlays that are on the plot
+and `FALSE` for overlays that aren't. So `for (i in which(ov$active))`
+runs a loop for all indices `i` that correspond to an "active" overlay.
 
-Then we read `begin` and `end` -- the start time and end time for each 
-intervention -- from `ov$cx0` (the starting x-coordinate of each overlay) and
-from `ov$cx1` (the ending x-coordinate of each overlay). We work out how many
-days into the epidemic `begin` and `end` are by subtracting the numeric value 
-of the start date of the epidemic, `as.numeric(input$date_range[1])`.
+Then we read `begin` and `end` -- the start time and end time for each
+intervention -- from `ov$cx0` (the starting x-coordinate of each
+overlay) and from `ov$cx1` (the ending x-coordinate of each overlay). We
+work out how many days into the epidemic `begin` and `end` are by
+subtracting the numeric value of the start date of the epidemic,
+`as.numeric(input$date_range[1])`.
 
 Then, each overlay has a `label` which corresponds to the `label` of the
-`overlayToken()` which created it. So we check whether the overlay with index
-`i` is a `"Vaccination"` or a `"Transmission"` overlay.
+`overlayToken()` which created it. So we check whether the overlay with
+index `i` is a `"Vaccination"` or a `"Transmission"` overlay.
 
-For vaccination overlays, we set the vaccination rate `nu` to 0.01, which (to
-`epidemics`) means 1% of the population is getting vaccinated per day. If
-there isn't already a vaccination intervention (and hence `vax` is `NULL`) then
-we create one. If there is, then we can't add a second vaccination intervention
-since the `epidemics` package only allows one vaccination intervention; so
-we deactivate the (second, superfluous) vaccine intervention if one already 
-exists.
+For vaccination overlays, we set the vaccination rate `nu` to 0.01,
+which (to `epidemics`) means 1% of the population is getting vaccinated
+per day. If there isn't already a vaccination intervention (and hence
+`vax` is `NULL`) then we create one. If there is, then we can't add a
+second vaccination intervention since the `epidemics` package only
+allows one vaccination intervention; so we deactivate the (second,
+superfluous) vaccine intervention if one already exists.
 
-For transmission overlays, we set the transmission reduction `reduc` to 0.5,
-which means a reduction in the transmission rate by 50%. We add our new
-intervention to the list `tx_int`. `epidemics` *does* allow multiple 
-transmission-rate interventions, so we don't need to limit the number of these.
+For transmission overlays, we set the transmission reduction `reduc` to
+0.5, which means a reduction in the transmission rate by 50%. We add our
+new intervention to the list `tx_int`. `epidemics` *does* allow multiple
+transmission-rate interventions, so we don't need to limit the number of
+these.
 
 Next in the code, we have this:
 
@@ -1152,37 +1201,44 @@ Next in the code, we have this:
 ```
 
 This just turns our list of transmission interventions `tx_int` into the
-right format for `epidemics` to understand. It wants the `intervention` argument
-to be a list with elements named `"transmission_rate"`, `"infectiousness_rate"`, 
-`"recovery_rate"`, or `"contacts"` depending on what kind of intervention it is.
-Each of these elements should be one or several interventions, and the way to 
-combine interventions is with `c()` (hence the `do.call`).
+right format for `epidemics` to understand. It wants the `intervention`
+argument to be a list with elements named `"transmission_rate"`,
+`"infectiousness_rate"`, `"recovery_rate"`, or `"contacts"` depending on
+what kind of intervention it is. Each of these elements should be one or
+several interventions, and the way to combine interventions is with
+`c()` (hence the `do.call`).
 
-Then the code above calls our function `run_model` with the 
-appropriately-formatted intervention data for `vaccination` and `intervention`.
+Then the code above calls our function `run_model` with the
+appropriately-formatted intervention data for `vaccination` and
+`intervention`.
 
-Put this all together, and you have a working app with intervention overlays!
+Put this all together, and you have a working app with intervention
+overlays!
 
 # Next steps
 
-We have come to the end of the tutorial. We haven't explored everything that
-`shiny` and `overshiny` can do, but we have gone through the basics. 
+We have come to the end of the tutorial. We haven't explored everything
+that `shiny` and `overshiny` can do, but we have gone through the
+basics.
 
 As a next step, it would be nice to modify our app to do two things:
 
-1. Compare the mitigated epidemic to the counterfactual--an unmitigated 
-    epidemic without any interventions. We could do this by plotting both
-    epi curves, with the unmitigated epi curve in a lighter colour.
-2. Allow us to customize the vaccination rate or the transmission reduction 
-    percentage of each intervention, instead of leaving these at 0.1% and 50%
-    respectively.
+1.  Compare the mitigated epidemic to the counterfactual--an unmitigated
+    epidemic without any interventions. We could do this by plotting
+    both epi curves, with the unmitigated epi curve in a lighter colour.
+2.  Allow us to customize the vaccination rate or the transmission
+    reduction percentage of each intervention, instead of leaving these
+    at 0.1% and 50% respectively.
 
-The following script shows you how to accomplish both of these things. Use the 
-`shiny` and `overshiny` package documentation for insight into what all the
-changes from your existing code do and how they work. Good luck!
+The following script shows you how to accomplish both of these things.
+Use the `shiny` and `overshiny` package documentation for insight into
+what all the changes from your existing code do and how they work. Good
+luck!
 
 <details>
+
 <summary>Click for advanced code...</summary>
+
 ```{r, eval = FALSE}
 library(epidemics)
 library(shiny)
@@ -1229,32 +1285,24 @@ server <- function(input, output)
 {
     # --- OVERLAY SETUP ---
 
-    # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("display", 8, width = 56, # 56 days = 8 weeks default width
-        data = list(vac_rate = 10, int_strength = 20), snap = snapGrid())
-
-    # --- OVERLAY DROPDOWN MENU ---
-
-    # Render dropdown menu when an overlay is being edited
-    output$display_menu <- renderUI({
-        i <- req(ov$editing)  # Current overlay being edited
-        fmt <- function(t) format(as.Date(t, origin = "1970-01-01"), "%b %d")
-
-        dropdown <- list(
-            div(paste(fmt(ov$cx0[i]), "–", fmt(ov$cx1[i]))),
-            selectInput("display_label", NULL, choices = c("Vaccination", "Transmission"), selected = ov$label[i])
-        )
-
+    # Dropdown menu for overlays
+    menu <- function(ov, i) {
         if (ov$label[i] == "Vaccination") {
-            dropdown[[3]] <- numericInput("display_vac_rate", "Vaccines per day (thousands)",
+            numericInput("display_vac_rate", "Vaccines per day (thousands)",
                 value = ov$data$vac_rate[i], min = 0, max = 10000)
         } else if (ov$label[i] == "Transmission") {
-            dropdown[[3]] <- sliderInput("display_int_strength", "Transmission reduction (%)",
+            sliderInput("display_int_strength", "Transmission reduction (%)",
                 value = ov$data$int_strength[i], min = 0, max = 100)
         }
+    }
 
-        return (dropdown)
-    })
+    # Initialise 8 draggable/resizable overlays
+    ov <- overlayServer("display", 8, width = 56, # 56 days = 8 weeks default width
+        data = list(vac_rate = 10, int_strength = 20),
+        snap = snapGrid(),
+        heading = dateHeading("%b %e"),
+        select = TRUE,
+        menu = menu)
 
     # --- EPIDEMIC MODEL RUNS BASED ON OVERLAY POSITIONS ---
 
@@ -1344,7 +1392,5 @@ server <- function(input, output)
 # --- Run app ---
 shinyApp(ui, server)
 ```
+
 </details>
-
-
-

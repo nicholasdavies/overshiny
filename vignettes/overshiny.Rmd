@@ -51,7 +51,7 @@ ui <- fluidPage(
 
         mainPanel(
             # Main plot with support for overlays
-            overlayPlotOutput("plot", width = "100%", height = 300)
+            overlayPlotOutput("display", width = "100%", height = 300)
         )
     )
 )
@@ -70,8 +70,9 @@ server <- function(input, output, session)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
-        data = list(strength = 50), snap = snapGrid())
+    ov <- overlayServer("display", 8, width = 56, # 56 days = 8 weeks default width
+        data = list(strength = 50), snap = snapGrid(),
+        heading = dateHeading("%b %e"), select = TRUE)
 
     # Toggle overlay visibility based on checkbox
     observe({
@@ -80,20 +81,38 @@ server <- function(input, output, session)
     
 ```
 
-The call to `overlayServer()` initializes (up to) 8 overlays that we can use. 
-It also sets the default width of new overlays to 56, which is in plot 
-coordinates. We'll be plotting a time series, so this means 56 days (8 weeks). 
-It provides the argument `data`, which is a list of additional attributes to be
-associated with each overlay. Here we're specifying that each overlay will have 
-an associated `strength` attribute, which we'll use to determine how much each
-overlay affects the output. And finally, we use `snap = snapGrid()` to specify
-a snapping function; the default parameters for `snapGrid()` ensure that each
+The call to `overlayServer()` takes as its first argument the ID of the 
+`overlayPlotOutput()` from the UI. Here, we initialize (up to) 8 overlays that 
+we can use. We also set the default width of new overlays to 56, which is in 
+plot coordinates. We'll be plotting a time series, so this means 56 days 
+(8 weeks).
+
+The `data` argument to `overlayServer()` is a list of additional attributes to 
+be associated with each overlay. Here we're specifying that each overlay will 
+have an associated `strength` attribute, which we'll use to determine how much 
+each overlay affects the output. We also use `snap = snapGrid()` to specify a 
+snapping function; the default parameters for `snapGrid()` ensure that each
 overlay's position and width is snapped to the nearest whole number.
 
-Then, we start with some of the reactive logic of the overlays. We have a 
-checkbox in our UI to control whether the overlays are shown or not, and the
-call to `observe()` makes the overlays show or hide based on the value of
-this checkbox.
+The next two arguments to `overlayServer()` relate to the overlay dropdown 
+menus. Each overlay automatically has a dropdown menu for adjusting settings 
+for the overlay. By default, this only includes a "remove" button that can be 
+used to remove the overlay. But we can add additional components to the 
+dropdown in the call to `overlayServer()`.
+
+The `heading` argument to `overlayServer()` allows us to add a small heading to
+the top of each overlay's dropdown menu; we are using the built-in 
+`dateHeading()` function here to specify the format of the heading. In this 
+case, `"%b %e"` translates to the abbreviated month name followed by the
+day of the month. So, for example, if the overlay extends over the x-axis range
+1st January to 28th February, the heading will show `"Jan 1 – Feb 28"`. 
+Finally, the `select = TRUE` argument means that each dropdown menu will also 
+allow us to change the type of the overlay, i.e. `"Grow"` or `"Shrink"`.
+
+After the call to `overlayServer()`, we start with some of the reactive logic 
+of the overlays. We have a checkbox in our UI to control whether the overlays 
+are shown or not, and the call to `observe()` makes the overlays show or hide 
+based on the value of this checkbox.
 
 Continuing on:
 
@@ -101,48 +120,40 @@ Continuing on:
     # --- OVERLAY DROPDOWN MENU ---
 
     # Render dropdown menu when an overlay is being edited
-    output$plot_menu <- renderUI({
-        i <- req(ov$editing)  # Current overlay being edited
-        fmt <- function(t) format(as.Date(t, origin = "1970-01-01"), "%b %d")
-
+    ov$menu <- function(ov, i) {
         list(
-            div(paste(fmt(ov$cx0[i]), "–", fmt(ov$cx1[i]))),
-            selectInput("plot_label", NULL, choices = c("Grow", "Shrink"), selected = ov$label[i]),
-            sliderInput("plot_strength", "Strength", min = 0, max = 100, value = ov$data$strength[i]),
-            dateInput("plot_cx", "Start date", value = ov$cx0[i]),
-            sliderInput("plot_cw", "Duration", min = 1, max = floor(ov$bound_cw), value = ov$cx1[i] - ov$cx0[i])
+            sliderInput("display_strength", "Strength", min = 0, max = 100, value = ov$data$strength[i]),
+            dateInput("display_cx", "Start date", value = ov$cx0[i]),
+            sliderInput("display_cw", "Duration", min = 1, max = floor(ov$bound_cw), value = ov$cx1[i] - ov$cx0[i])
         )
-    })
+    }
 
 ```
 
-Each overlay automatically has a dropdown menu for adjusting settings for the
-overlay. By default, this only includes a "remove" button that can be used to 
-remove the overlay. But we can add extra elements to these menus by using
-`renderUI()`.
+Here, we add some additional, custom components to the overlay dropdown menu
+by assigning a function to the variable `ov$menu`. We can also pass this
+function in as the `menu` argument to `overlayServer()`, but the two approaches
+are equivalent here. 
 
-Since we created an `overlayPlotOutput()` with the output ID `"plot"`, 
-`overshiny` has also created a UI output slot named `"plot_menu"` which is used 
-to add extra elements to each overlay's dropdown menu. For our purposes, we'll
-include a `div()` element which shows the date range for the overlay, a 
-`selectInput()` to choose between "Grow" and "Shrink" type overlays, and a 
-`sliderInput()` to choose the percentage "strength" associated with the overlay.
-We also allow the user to manually enter the start date of each overlay 
-(`"plot_cx"`) and the width of each overlay (`"plot_cw"`). Here, `"plot_label"`,
-`"plot_cx"`, and `"plot_cw"` will automatically set the label, position, and
-width of each overlay because `"label"`, `"cx"`, and `"cw"` are interpreted
-specially by `overshiny`. `"strength"` doesn't have any special interpretation
-so it will be applied to `ov$data$strength`. See the documentation for
+For our purposes, we'll add a `sliderInput()` to choose the percentage 
+"strength" associated with the overlay. We also allow the user to manually 
+enter the start date of each overlay (`"display_cx"`) and the width of each 
+overlay (`"display_cw"`). Here, `"display_cx"` and `"display_cw"` will 
+automatically set the position and width of each overlay because `"cx"` and 
+`"cw"` are interpreted specially by `overshiny`. `"strength"` doesn't have any 
+special interpretation so it will be applied to `ov$data$strength`. Note that 
+the IDs of all these UI widgets start with `"display_"` because we gave our
+`overlayPlotOutput()` the ID `"display"` in the UI. See the documentation for 
 `overlayServer()` for more details.
 
-The line `i <- req(ov$editing)` just gets the index (1 to 8) of the current
-overlay being edited. The call to `req()` ensures that the rest of the code
-in the `renderUI()` call won't be run unless there is an overlay currently
-being edited via its dropdown menu.
+It's important here to set the "starting value" for each of the three custom
+input widgets using values from the `ov` object. If we just supplied some 
+"default" value for each of these, this value would reset each time we opened 
+the dropdown menu.
 
-Note that above, each overlay has the same elements in its dropdown menu, but
+In this example, each overlay has the same elements in its dropdown menu, but
 we could choose to return different contents for the dropdown menu depending on 
-which overlay is being edited.
+which overlay `i` is being edited.
 
 Now let's make some data to plot based on the overlays and their properties:
 
@@ -181,7 +192,7 @@ Finally, we render the time series:
     # --- RENDERING OF DATA ---
 
     # Render plot and align overlays to current axis limits
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         plot <- ggplot(data()) +
             geom_line(aes(x = date, y = y)) +
             ylim(0, 3) +

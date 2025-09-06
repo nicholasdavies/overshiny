@@ -16,19 +16,22 @@ to \code{step}. Use \code{NULL} for no minimum.}
 
 \item{max_width}{(optional) Maximum width of an overlay; default (\code{NA}) sets
 to the largest size that accommodates the width of the overlay bounds,
-accounting for the grid. Use \code{NULL} for no maximum.
-
-Note that the default values snap overlays to whole numbers.}
+accounting for the grid. Use \code{NULL} for no maximum.}
 }
 \value{
 A snapping function suitable to pass to \code{\link[=overlayServer]{overlayServer()}} as the
 \code{snap} argument.
 }
 \description{
-Use this function as the \code{snap} parameter of \code{\link[=overlayServer]{overlayServer()}} to enable
-a simple snap-to-grid behaviour for your overlay. It will ensure your
+Use a call to this function as the \code{snap} parameter of \code{\link[=overlayServer]{overlayServer()}} to
+enable a simple snap-to-grid behaviour for your overlay. It will ensure your
 overlays stay within the bounds of the plot, and snap both position and
 width of each overlay to the specified grid.
+}
+\details{
+Note that you do not pass just \code{snapGrid} to \code{\link[=overlayServer]{overlayServer()}}, but e.g.
+\code{snapGrid()} or \code{snapGrid(step = 0.1)}. The default values snap overlays to
+whole numbers.
 }
 \examples{
 server <- function(input, output) {

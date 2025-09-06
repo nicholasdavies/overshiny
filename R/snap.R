@@ -1,9 +1,13 @@
 #' Snap overlays to a grid
 #'
-#' Use this function as the `snap` parameter of [overlayServer()] to enable
-#' a simple snap-to-grid behaviour for your overlay. It will ensure your
+#' Use a call to this function as the `snap` parameter of [overlayServer()] to
+#' enable a simple snap-to-grid behaviour for your overlay. It will ensure your
 #' overlays stay within the bounds of the plot, and snap both position and
 #' width of each overlay to the specified grid.
+#'
+#' Note that you do not pass just `snapGrid` to [overlayServer()], but e.g.
+#' `snapGrid()` or `snapGrid(step = 0.1)`. The default values snap overlays to
+#' whole numbers.
 #'
 #' @param anchor The location of any specific gridline.
 #' @param step The space between gridlines.
@@ -12,8 +16,6 @@
 #' @param max_width (optional) Maximum width of an overlay; default (`NA`) sets
 #'     to the largest size that accommodates the width of the overlay bounds,
 #'     accounting for the grid. Use `NULL` for no maximum.
-#'
-#' Note that the default values snap overlays to whole numbers.
 #'
 #' @return A snapping function suitable to pass to [overlayServer()] as the
 #' `snap` argument.

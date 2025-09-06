@@ -67,7 +67,7 @@ ui <- fluidPage(
 
         mainPanel(
             # Main plot with support for overlays
-            overlayPlotOutput("plot", width = "100%", height = 300)
+            overlayPlotOutput("display", width = "100%", height = 300)
         )
     )
 )
@@ -78,8 +78,9 @@ server <- function(input, output, session)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
-        data = list(strength = 50), snap = snapGrid())
+    ov <- overlayServer("display", 8, width = 56, # 56 days = 8 weeks default width
+        data = list(strength = 50), snap = snapGrid(),
+        heading = dateHeading("%b %e"), select = TRUE, menu = menu)
 
     # Toggle overlay visibility based on checkbox
     observe({
@@ -89,18 +90,13 @@ server <- function(input, output, session)
     # --- OVERLAY DROPDOWN MENU ---
 
     # Render dropdown menu when an overlay is being edited
-    output$plot_menu <- renderUI({
-        i <- req(ov$editing)  # Current overlay being edited
-        fmt <- function(t) format(as.Date(t, origin = "1970-01-01"), "%b %d")
-
+    ov$menu <- function(ov, i) {
         list(
-            div(paste(fmt(ov$cx0[i]), "–", fmt(ov$cx1[i]))),
-            selectInput("plot_label", NULL, choices = c("Grow", "Shrink"), selected = ov$label[i]),
-            sliderInput("plot_strength", "Strength", min = 0, max = 100, value = ov$data$strength[i]),
-            dateInput("plot_cx", "Start date", value = ov$cx0[i]),
-            sliderInput("plot_cw", "Duration", min = 1, max = floor(ov$bound_cw), value = ov$cx1[i] - ov$cx0[i])
+            sliderInput("display_strength", "Strength", min = 0, max = 100, value = ov$data$strength[i]),
+            dateInput("display_cx", "Start date", value = ov$cx0[i]),
+            sliderInput("display_cw", "Duration", min = 1, max = floor(ov$bound_cw), value = ov$cx1[i] - ov$cx0[i])
         )
-    })
+    }
 
     # --- DATA PROCESSING BASED ON OVERLAY POSITION ---
 
@@ -126,7 +122,7 @@ server <- function(input, output, session)
     # --- RENDERING OF DATA ---
 
     # Render plot and align overlays to current axis limits
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         plot <- ggplot(data()) +
             geom_line(aes(x = date, y = y)) +
             ylim(0, 3) +
@@ -139,4 +135,3 @@ server <- function(input, output, session)
 # --- Run app ---
 shinyApp(ui, server)
 ```
-
