@@ -96,7 +96,7 @@ the overlay dropdown menu.</p></dd>
 <dt id="arg-snap">snap<a class="anchor" aria-label="anchor" href="#arg-snap"></a></dt>
 <dd><p>Function to "snap" overlay coordinates to a grid, or <code>"none"</code>
 (default) for no snapping. See details for how to specify the snap
-function; you can also use the built-in <code><a href="snap_grid.html">snap_grid()</a></code>.</p></dd>
+function; you can also use the built-in <code><a href="snapGrid.html">snapGrid()</a></code>.</p></dd>
 
 
 <dt id="arg-colours">colours<a class="anchor" aria-label="anchor" href="#arg-colours"></a></dt>
@@ -178,7 +178,7 @@ the x axis range of the plot changes, so it may be a good idea to provide
 one if the user might place an overlay onto the plot, but then change the x
 axis range of the plot such that the overlay is no longer visible. You can
 detect this by verifying whether the overlay rectangles are "out of bounds"
-at the top of your snapping function. See the code for <code><a href="snap_grid.html">snap_grid()</a></code> for
+at the top of your snapping function. See the code for <code><a href="snapGrid.html">snapGrid()</a></code> for
 ideas.</p>
     </div>
     <div class="section level2">
@@ -195,7 +195,7 @@ ideas.</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu">overlayServer</span><span class="op">(</span><span class="st">"my_plot"</span>, <span class="fl">4</span>, <span class="fl">1</span>, snap <span class="op">=</span> <span class="fu"><a href="snap_grid.html">snap_grid</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu">overlayServer</span><span class="op">(</span><span class="st">"my_plot"</span>, <span class="fl">4</span>, <span class="fl">1</span>, snap <span class="op">=</span> <span class="fu"><a href="snapGrid.html">snapGrid</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">my_plot_menu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span></span>
 <span class="r-in"><span>        <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">editing</span><span class="op">)</span></span></span>

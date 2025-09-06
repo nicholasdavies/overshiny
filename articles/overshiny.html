@@ -119,7 +119,7 @@ the overlays:</p>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"plot"</span>, <span class="dv">8</span>, <span class="at">width =</span> <span class="dv">56</span>, <span class="co"># 56 days = 8 weeks default width</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>        <span class="at">data =</span> <span class="fu">list</span>(<span class="at">strength =</span> <span class="dv">50</span>), <span class="at">snap =</span> <span class="fu">snap_grid</span>())</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>        <span class="at">data =</span> <span class="fu">list</span>(<span class="at">strength =</span> <span class="dv">50</span>), <span class="at">snap =</span> <span class="fu">snapGrid</span>())</span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="co"># Toggle overlay visibility based on checkbox</span></span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="fu">observe</span>({</span>
@@ -134,8 +134,8 @@ this means 56 days (8 weeks). It provides the argument
 associated with each overlay. Here we’re specifying that each overlay
 will have an associated <code>strength</code> attribute, which we’ll use
 to determine how much each overlay affects the output. And finally, we
-use <code>snap = snap_grid()</code> to specify a snapping function; the
-default parameters for <code><a href="../reference/snap_grid.html">snap_grid()</a></code> ensure that each
+use <code>snap = snapGrid()</code> to specify a snapping function; the
+default parameters for <code><a href="../reference/snapGrid.html">snapGrid()</a></code> ensure that each
 overlay’s position and width is snapped to the nearest whole number.</p>
 <p>Then, we start with some of the reactive logic of the overlays. We
 have a checkbox in our UI to control whether the overlays are shown or
