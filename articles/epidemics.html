@@ -470,7 +470,7 @@ one addition:</p>
 <span>    </span>
 <span>    <span class="co"># NEW PART IS HERE:</span></span>
 <span>    <span class="co"># Main plot</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="st">"display"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
 <span>    <span class="co"># END OF NEW PART</span></span>
 <span></span>
 <span>    <span class="co"># 3 columns of inputs</span></span>
@@ -500,14 +500,14 @@ one addition:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The bit we added was a <code>plotOutput</code> call, which puts space
 in the app for a plot (either <code>ggplot2</code> or base R plot) with
-the ID <code>"plot"</code>. To connect this plot with the inputs, we
+the ID <code>"display"</code>. To connect this plot with the inputs, we
 need to add some code to our <code>server</code> function, so put this
 code underneath what you have already:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># --- App logic ---</span></span>
 <span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
@@ -525,12 +525,12 @@ on how you manipulate the various input controls.</p>
 <p>That handful of lines in <code>server</code> is doing a lot. First,
 note that we’re calling the <code>shiny</code> function
 <code>renderPlot</code>, and assigning the value to
-<code>output$plot</code>. The reason <code>output$plot</code> exists is
-because we put a <code>plotOutput</code> in the <code>shiny</code> UI
-with ID <code>"plot"</code> – this makes an entry in <code>output</code>
-called <code>plot</code> which is ready to receive a plot from the
-server function. If in our UI, we had given our <code>plotOutput</code>
-a different ID, like:</p>
+<code>output$display</code>. The reason <code>output$display</code>
+exists is because we put a <code>plotOutput</code> in the
+<code>shiny</code> UI with ID <code>"display"</code> – this makes an
+entry in <code>output</code> called <code>display</code> which is ready
+to receive a plot from the server function. If in our UI, we had given
+our <code>plotOutput</code> a different ID, like:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>    <span class="fu">plotOutput</span>(<span class="st">"marmite"</span>, <span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="dv">400</span>),</span></code></pre></div>
 <p>then we would have to assign the results of a call to
 <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code> to <code>output$marmite</code>.</p>
@@ -614,7 +614,7 @@ Click for starter code…
 <span>    </span>
 <span>    <span class="co"># NEW PART IS HERE:</span></span>
 <span>    <span class="co"># Main plot</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="st">"display"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
 <span>    <span class="co"># END OF NEW PART</span></span>
 <span></span>
 <span>    <span class="co"># 3 columns of inputs</span></span>
@@ -646,7 +646,7 @@ Click for starter code…
 <span><span class="co"># --- App logic ---</span></span>
 <span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
@@ -666,7 +666,7 @@ with:</p>
 to an <code>overlayPlotOutput</code> so that it can respond to
 overlays:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>    <span class="co"># Main plot</span></span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>    <span class="fu">overlayPlotOutput</span>(<span class="st">"plot"</span>, <span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="dv">400</span>),</span></code></pre></div>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>    <span class="fu">overlayPlotOutput</span>(<span class="st">"display"</span>, <span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="dv">400</span>),</span></code></pre></div>
 <p>Third, we need to add some <code><a href="../reference/overlayToken.html">overlayToken()</a></code>s that can be
 dragged onto the plot. Let’s put these into the currently-blank
 “Interventions” section of our UI:</p>
@@ -687,14 +687,17 @@ function:</p>
 <span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>    <span class="co"># --- OVERLAY SETUP ---</span></span>
 <span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a></span>
 <span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
-<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"plot"</span>, <span class="dv">8</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"display"</span>, <span class="dv">8</span>)</span>
 <span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a></span>
 <span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>    <span class="co"># rest of code follows as normal...</span></span></code></pre></div>
+<p>We need to provide <code>overlayServer</code> with the id of our
+<code>overlayPlot</code> (here, <code>"display"</code>) and the maximum
+number of overlays to support.</p>
 <p>And finally, we need to modify our call to <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code>
 in the <code>server</code> function to tell <code>overshiny</code> more
 information about our plot. Where before we had:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
@@ -704,7 +707,7 @@ information about our plot. Where before we had:</p>
 <span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Now, we have:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
@@ -788,7 +791,7 @@ Click for code…
 <span>    </span>
 <span>    <span class="co"># NEW PART IS HERE:</span></span>
 <span>    <span class="co"># Main plot</span></span>
-<span>    <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"display"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
 <span>    <span class="co"># END OF NEW PART</span></span>
 <span></span>
 <span>    <span class="co"># 3 columns of inputs</span></span>
@@ -825,11 +828,11 @@ Click for code…
 <span>    <span class="co"># --- OVERLAY SETUP ---</span></span>
 <span></span>
 <span>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
-<span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/overlayServer.html">overlayServer</a></span><span class="op">(</span><span class="st">"plot"</span>, <span class="fl">8</span><span class="op">)</span></span>
+<span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/overlayServer.html">overlayServer</a></span><span class="op">(</span><span class="st">"display"</span>, <span class="fl">8</span><span class="op">)</span></span>
 <span>    </span>
 <span>    <span class="co"># --- RENDERING OF EPI CURVES ---</span></span>
 <span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
@@ -878,7 +881,7 @@ reads in what overlays have been placed onto the plot, and fills out the
 <code>intervention</code> and <code>vaccination</code> parameters
 accordingly.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="co"># Create interventions</span></span>
 <span>        <span class="va">tx_int</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>        <span class="va">vax</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
@@ -963,7 +966,7 @@ accordingly.</p>
 <span>    </span>
 <span>    <span class="co"># NEW PART IS HERE:</span></span>
 <span>    <span class="co"># Main plot</span></span>
-<span>    <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"display"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
 <span>    <span class="co"># END OF NEW PART</span></span>
 <span></span>
 <span>    <span class="co"># 3 columns of inputs</span></span>
@@ -1000,11 +1003,11 @@ accordingly.</p>
 <span>    <span class="co"># --- OVERLAY SETUP ---</span></span>
 <span></span>
 <span>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
-<span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/overlayServer.html">overlayServer</a></span><span class="op">(</span><span class="st">"plot"</span>, <span class="fl">8</span><span class="op">)</span></span>
+<span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/overlayServer.html">overlayServer</a></span><span class="op">(</span><span class="st">"display"</span>, <span class="fl">8</span><span class="op">)</span></span>
 <span>    </span>
 <span>    <span class="co"># --- RENDERING OF EPI CURVES ---</span></span>
 <span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="co"># Create interventions</span></span>
 <span>        <span class="va">tx_int</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>        <span class="va">vax</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
@@ -1056,7 +1059,7 @@ accordingly.</p>
 </details><p>Compare the new call to <code><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot()</a></code> to what we had
 before, which was:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<code class="sourceCode R"><span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">run_model</span><span class="op">(</span><span class="va">input</span><span class="op">)</span></span>
 <span>        <span class="va">results</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">[</span><span class="va">results</span><span class="op">$</span><span class="va">compartment</span> <span class="op">==</span> <span class="st">"infectious"</span>, <span class="op">]</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1188,7 +1191,7 @@ Click for advanced code…
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/titlePanel.html" class="external-link">titlePanel</a></span><span class="op">(</span><span class="st">"SEIRV model with interventions"</span><span class="op">)</span>,</span>
 <span></span>
 <span>    <span class="co"># Main plot with support for overlays</span></span>
-<span>    <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"display"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">400</span><span class="op">)</span>,</span>
 <span></span>
 <span>    <span class="co"># 3 columns of inputs</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidRow</a></span><span class="op">(</span></span>
@@ -1224,26 +1227,26 @@ Click for advanced code…
 <span>    <span class="co"># --- OVERLAY SETUP ---</span></span>
 <span></span>
 <span>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
-<span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/overlayServer.html">overlayServer</a></span><span class="op">(</span><span class="st">"plot"</span>, <span class="fl">8</span>, width <span class="op">=</span> <span class="fl">56</span>, <span class="co"># 56 days = 8 weeks default width</span></span>
+<span>    <span class="va">ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/overlayServer.html">overlayServer</a></span><span class="op">(</span><span class="st">"display"</span>, <span class="fl">8</span>, width <span class="op">=</span> <span class="fl">56</span>, <span class="co"># 56 days = 8 weeks default width</span></span>
 <span>        data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>vac_rate <span class="op">=</span> <span class="fl">10</span>, int_strength <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, snap <span class="op">=</span> <span class="fu"><a href="../reference/snapGrid.html">snapGrid</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># --- OVERLAY DROPDOWN MENU ---</span></span>
 <span></span>
 <span>    <span class="co"># Render dropdown menu when an overlay is being edited</span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_menu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">output</span><span class="op">$</span><span class="va">display_menu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">editing</span><span class="op">)</span>  <span class="co"># Current overlay being edited</span></span>
 <span>        <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">t</span>, origin <span class="op">=</span> <span class="st">"1970-01-01"</span><span class="op">)</span>, <span class="st">"%b %d"</span><span class="op">)</span></span>
 <span></span>
 <span>        <span class="va">dropdown</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>            <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu">fmt</span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="st">"–"</span>, <span class="fu">fmt</span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">cx1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">selectInput</a></span><span class="op">(</span><span class="st">"plot_label"</span>, <span class="cn">NULL</span>, choices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Vaccination"</span>, <span class="st">"Transmission"</span><span class="op">)</span>, selected <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">selectInput</a></span><span class="op">(</span><span class="st">"display_label"</span>, <span class="cn">NULL</span>, choices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Vaccination"</span>, <span class="st">"Transmission"</span><span class="op">)</span>, selected <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
 <span></span>
 <span>        <span class="kw">if</span> <span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">==</span> <span class="st">"Vaccination"</span><span class="op">)</span> <span class="op">{</span></span>
-<span>            <span class="va">dropdown</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/numericInput.html" class="external-link">numericInput</a></span><span class="op">(</span><span class="st">"plot_vac_rate"</span>, <span class="st">"Vaccines per day (thousands)"</span>,</span>
+<span>            <span class="va">dropdown</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/numericInput.html" class="external-link">numericInput</a></span><span class="op">(</span><span class="st">"display_vac_rate"</span>, <span class="st">"Vaccines per day (thousands)"</span>,</span>
 <span>                value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">vac_rate</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, min <span class="op">=</span> <span class="fl">0</span>, max <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span></span>
 <span>        <span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">==</span> <span class="st">"Transmission"</span><span class="op">)</span> <span class="op">{</span></span>
-<span>            <span class="va">dropdown</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="st">"plot_int_strength"</span>, <span class="st">"Transmission reduction (%)"</span>,</span>
+<span>            <span class="va">dropdown</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="st">"display_int_strength"</span>, <span class="st">"Transmission reduction (%)"</span>,</span>
 <span>                value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">int_strength</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, min <span class="op">=</span> <span class="fl">0</span>, max <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span>        <span class="op">}</span></span>
 <span></span>
@@ -1322,7 +1325,7 @@ Click for advanced code…
 <span>    <span class="co"># --- RENDERING OF EPI CURVES ---</span></span>
 <span></span>
 <span>    <span class="co"># Render plot and align overlays to current axis limits</span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">output</span><span class="op">$</span><span class="va">display</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>        <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>            <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu">epi_unmitigated</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>                <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">/</span><span class="fl">1000</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
