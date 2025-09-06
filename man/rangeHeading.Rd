@@ -5,9 +5,9 @@
 \alias{dateHeading}
 \title{Headings for overlay dropdown menus}
 \usage{
-rangeHeading(..., sep = " – ")
+rangeHeading(..., sep = " - ")
 
-dateHeading(format, ..., sep = " – ")
+dateHeading(format, ..., sep = " - ")
 }
 \arguments{
 \item{...}{Further arguments to be passed to \code{\link[=format]{format()}}, such as \code{digits},
@@ -27,8 +27,8 @@ A heading function suitable to pass to \code{\link[=overlayServer]{overlayServer
 Use a call to one of these functions as the \code{heading} parameter of
 \code{\link[=overlayServer]{overlayServer()}} to provide a heading on the overlay dropdown menu
 reporting the start and end position of the overlay. For numbers, the
-heading from \code{\link[=rangeHeading]{rangeHeading()}} will be e.g. "1.5 – 3.5". For dates, the
-heading from \code{\link[=dateHeading]{dateHeading()}} will be e.g. "2025-05-01 – 2025-06-01".
+heading from \code{\link[=rangeHeading]{rangeHeading()}} will be e.g. "1.5 - 3.5". For dates, the
+heading from \code{\link[=dateHeading]{dateHeading()}} will be e.g. "2025-05-01 - 2025-06-01".
 }
 \examples{
 server <- function(input, output) {
