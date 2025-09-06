@@ -58,7 +58,7 @@
 #'     (default), set to 10% of the plot width.
 #' @param data Named list of custom overlay-specific properties to be edited in
 #'     the overlay dropdown menu.
-#' @param snap Function to "snap" overlay coordinates to a grid, or `"none"`
+#' @param snap Function to "snap" overlay coordinates to a grid, or `NULL`
 #'     (default) for no snapping. See details for how to specify the snap
 #'     function; you can also use the built-in [snapGrid()].
 #' @param colours A function to assign custom colours to the overlays. Should
@@ -147,8 +147,9 @@
 #'
 #' @export
 overlayServer = function(outputId, nrect, width = NULL, data = NULL,
-    snap = "none", colours = overlayColours, opacity = 0.25,
-    icon = shiny::icon("gear"), stagger = 0.045, style = list(), debug = FALSE)
+    snap = NULL, heading = NULL, select = NULL, menu = NULL,
+    colours = overlayColours, opacity = 0.25, icon = shiny::icon("gear"),
+    stagger = 0.045, style = list(), debug = FALSE)
 {
     session = shiny::getDefaultReactiveDomain()
     input = session$input
@@ -255,14 +256,14 @@ overlayServer = function(outputId, nrect, width = NULL, data = NULL,
         ov$cx0[i] = (ov$px[i] / ov$bound_pw) * ov$bound_cw + ov$bound_cx;
         ov$cx1[i] = ((ov$px[i] + ov$pw[i]) / ov$bound_pw) * ov$bound_cw + ov$bound_cx;
 
-        if (!identical(ov$snap, "none")) {
+        if (!is.null(ov$snap)) {
             ov$update_px(i)
         }
     }
 
     # Set px and pw of all overlays from cx0 and cx1
     ov$update_px = function(j = seq_len(ov$n)) {
-        if (identical(ov$snap, "none")) {
+        if (is.null(ov$snap)) {
             # Ensure times are in proper range
             ov$cx0[j] = pmax(ov$cx0[j], ov$bound_cx);
             ov$cx1[j] = pmin(ov$cx1[j], ov$bound_cx + ov$bound_cw);
@@ -356,7 +357,7 @@ overlayServer = function(outputId, nrect, width = NULL, data = NULL,
         }
     })
 
-    # Close all dropdowns and their contents
+    # Helper to close all dropdowns and remove their contents
     clear_dropdowns = function() {
         setcss(ovmatch("dropdown", outputId), display = "none")
         shiny::removeUI(ovsel("menu"), immediate = TRUE)

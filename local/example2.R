@@ -70,7 +70,7 @@ mysnap <- function(ov, i) {
 
     # Toggle snap
     observe({
-        ov$snap <- ifelse(isTRUE(input$enable_snap), mysnap, "none")
+        ov$snap <- if (isTRUE(input$enable_snap)) mysnap
     })
 
     # Toggle stagger

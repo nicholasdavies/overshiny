@@ -9,7 +9,10 @@ overlayServer(
   nrect,
   width = NULL,
   data = NULL,
-  snap = "none",
+  snap = NULL,
+  heading = NULL,
+  select = NULL,
+  menu = NULL,
   colours = overlayColours,
   opacity = 0.25,
   icon = shiny::icon("gear"),
@@ -29,7 +32,7 @@ overlayServer(
 \item{data}{Named list of custom overlay-specific properties to be edited in
 the overlay dropdown menu.}
 
-\item{snap}{Function to "snap" overlay coordinates to a grid, or \code{"none"}
+\item{snap}{Function to "snap" overlay coordinates to a grid, or \code{NULL}
 (default) for no snapping. See details for how to specify the snap
 function; you can also use the built-in \code{\link[=snapGrid]{snapGrid()}}.}
 
