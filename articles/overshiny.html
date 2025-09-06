@@ -103,7 +103,7 @@ will appear:</p>
 <span></span>
 <span>        <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sidebarLayout.html" class="external-link">mainPanel</a></span><span class="op">(</span></span>
 <span>            <span class="co"># Main plot with support for overlays</span></span>
-<span>            <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"plot"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
+<span>            <span class="fu"><a href="../reference/overlayPlotOutput.html">overlayPlotOutput</a></span><span class="op">(</span><span class="st">"display"</span>, width <span class="op">=</span> <span class="st">"100%"</span>, height <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -118,76 +118,88 @@ the overlays:</p>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    <span class="co"># --- OVERLAY SETUP ---</span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="co"># Initialise 8 draggable/resizable overlays</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"plot"</span>, <span class="dv">8</span>, <span class="at">width =</span> <span class="dv">56</span>, <span class="co"># 56 days = 8 weeks default width</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>        <span class="at">data =</span> <span class="fu">list</span>(<span class="at">strength =</span> <span class="dv">50</span>), <span class="at">snap =</span> <span class="fu">snapGrid</span>())</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="co"># Toggle overlay visibility based on checkbox</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="fu">observe</span>({</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>        ov<span class="sc">$</span>show <span class="ot">&lt;-</span> <span class="fu">isTRUE</span>(input<span class="sc">$</span>show_overlays)</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    })</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    </span></code></pre></div>
-<p>The call to <code><a href="../reference/overlayServer.html">overlayServer()</a></code> initializes (up to) 8
-overlays that we can use. It also sets the default width of new overlays
-to 56, which is in plot coordinates. We’ll be plotting a time series, so
-this means 56 days (8 weeks). It provides the argument
-<code>data</code>, which is a list of additional attributes to be
-associated with each overlay. Here we’re specifying that each overlay
-will have an associated <code>strength</code> attribute, which we’ll use
-to determine how much each overlay affects the output. And finally, we
-use <code>snap = snapGrid()</code> to specify a snapping function; the
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    ov <span class="ot">&lt;-</span> <span class="fu">overlayServer</span>(<span class="st">"display"</span>, <span class="dv">8</span>, <span class="at">width =</span> <span class="dv">56</span>, <span class="co"># 56 days = 8 weeks default width</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>        <span class="at">data =</span> <span class="fu">list</span>(<span class="at">strength =</span> <span class="dv">50</span>), <span class="at">snap =</span> <span class="fu">snapGrid</span>(),</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>        <span class="at">heading =</span> <span class="fu">dateHeading</span>(<span class="st">"%b %e"</span>), <span class="at">select =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="co"># Toggle overlay visibility based on checkbox</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    <span class="fu">observe</span>({</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>        ov<span class="sc">$</span>show <span class="ot">&lt;-</span> <span class="fu">isTRUE</span>(input<span class="sc">$</span>show_overlays)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    })</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    </span></code></pre></div>
+<p>The call to <code><a href="../reference/overlayServer.html">overlayServer()</a></code> takes as its first argument
+the ID of the <code><a href="../reference/overlayPlotOutput.html">overlayPlotOutput()</a></code> from the UI. Here, we
+initialize (up to) 8 overlays that we can use. We also set the default
+width of new overlays to 56, which is in plot coordinates. We’ll be
+plotting a time series, so this means 56 days (8 weeks).</p>
+<p>The <code>data</code> argument to <code><a href="../reference/overlayServer.html">overlayServer()</a></code> is a
+list of additional attributes to be associated with each overlay. Here
+we’re specifying that each overlay will have an associated
+<code>strength</code> attribute, which we’ll use to determine how much
+each overlay affects the output. We also use
+<code>snap = snapGrid()</code> to specify a snapping function; the
 default parameters for <code><a href="../reference/snapGrid.html">snapGrid()</a></code> ensure that each
 overlay’s position and width is snapped to the nearest whole number.</p>
-<p>Then, we start with some of the reactive logic of the overlays. We
-have a checkbox in our UI to control whether the overlays are shown or
-not, and the call to <code><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe()</a></code> makes the overlays show or
-hide based on the value of this checkbox.</p>
+<p>The next two arguments to <code><a href="../reference/overlayServer.html">overlayServer()</a></code> relate to the
+overlay dropdown menus. Each overlay automatically has a dropdown menu
+for adjusting settings for the overlay. By default, this only includes a
+“remove” button that can be used to remove the overlay. But we can add
+additional components to the dropdown in the call to
+<code><a href="../reference/overlayServer.html">overlayServer()</a></code>.</p>
+<p>The <code>heading</code> argument to <code><a href="../reference/overlayServer.html">overlayServer()</a></code>
+allows us to add a small heading to the top of each overlay’s dropdown
+menu; we are using the built-in <code><a href="../reference/rangeHeading.html">dateHeading()</a></code> function here
+to specify the format of the heading. In this case, <code>"%b %e"</code>
+translates to the abbreviated month name followed by the day of the
+month. So, for example, if the overlay extends over the x-axis range 1st
+January to 28th February, the heading will show
+<code>"Jan 1 – Feb 28"</code>. Finally, the <code>select = TRUE</code>
+argument means that each dropdown menu will also allow us to change the
+type of the overlay, i.e. <code>"Grow"</code> or
+<code>"Shrink"</code>.</p>
+<p>After the call to <code><a href="../reference/overlayServer.html">overlayServer()</a></code>, we start with some of
+the reactive logic of the overlays. We have a checkbox in our UI to
+control whether the overlays are shown or not, and the call to
+<code><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe()</a></code> makes the overlays show or hide based on the
+value of this checkbox.</p>
 <p>Continuing on:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="co"># --- OVERLAY DROPDOWN MENU ---</span></span>
 <span></span>
 <span>    <span class="co"># Render dropdown menu when an overlay is being edited</span></span>
-<span>    <span class="va">output</span><span class="op">$</span><span class="va">plot_menu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>        <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">editing</span><span class="op">)</span>  <span class="co"># Current overlay being edited</span></span>
-<span>        <span class="va">fmt</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">t</span>, origin <span class="op">=</span> <span class="st">"1970-01-01"</span><span class="op">)</span>, <span class="st">"%b %d"</span><span class="op">)</span></span>
-<span></span>
+<span>    <span class="va">ov</span><span class="op">$</span><span class="va">menu</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">ov</span>, <span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
 <span>        <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>            <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu">fmt</span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>, <span class="st">"–"</span>, <span class="fu">fmt</span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">cx1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">selectInput</a></span><span class="op">(</span><span class="st">"plot_label"</span>, <span class="cn">NULL</span>, choices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grow"</span>, <span class="st">"Shrink"</span><span class="op">)</span>, selected <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="st">"plot_strength"</span>, <span class="st">"Strength"</span>, min <span class="op">=</span> <span class="fl">0</span>, max <span class="op">=</span> <span class="fl">100</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">strength</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/dateInput.html" class="external-link">dateInput</a></span><span class="op">(</span><span class="st">"plot_cx"</span>, <span class="st">"Start date"</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="st">"plot_cw"</span>, <span class="st">"Duration"</span>, min <span class="op">=</span> <span class="fl">1</span>, max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">bound_cw</span><span class="op">)</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="st">"display_strength"</span>, <span class="st">"Strength"</span>, min <span class="op">=</span> <span class="fl">0</span>, max <span class="op">=</span> <span class="fl">100</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">strength</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/dateInput.html" class="external-link">dateInput</a></span><span class="op">(</span><span class="st">"display_cx"</span>, <span class="st">"Start date"</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="st">"display_cw"</span>, <span class="st">"Duration"</span>, min <span class="op">=</span> <span class="fl">1</span>, max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">ov</span><span class="op">$</span><span class="va">bound_cw</span><span class="op">)</span>, value <span class="op">=</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx1</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">ov</span><span class="op">$</span><span class="va">cx0</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
 <span>        <span class="op">)</span></span>
-<span>    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>Each overlay automatically has a dropdown menu for adjusting settings
-for the overlay. By default, this only includes a “remove” button that
-can be used to remove the overlay. But we can add extra elements to
-these menus by using <code><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI()</a></code>.</p>
-<p>Since we created an <code><a href="../reference/overlayPlotOutput.html">overlayPlotOutput()</a></code> with the output
-ID <code>"plot"</code>, <code>overshiny</code> has also created a UI
-output slot named <code>"plot_menu"</code> which is used to add extra
-elements to each overlay’s dropdown menu. For our purposes, we’ll
-include a <code><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div()</a></code> element which shows the date range for the
-overlay, a <code><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">selectInput()</a></code> to choose between “Grow” and
-“Shrink” type overlays, and a <code><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput()</a></code> to choose the
-percentage “strength” associated with the overlay. We also allow the
+<span>    <span class="op">}</span></span></code></pre></div>
+<p>Here, we add some additional, custom components to the overlay
+dropdown menu by assigning a function to the variable
+<code>ov$menu</code>. We can also pass this function in as the
+<code>menu</code> argument to <code><a href="../reference/overlayServer.html">overlayServer()</a></code>, but the two
+approaches are equivalent here.</p>
+<p>For our purposes, we’ll add a <code><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput()</a></code> to choose
+the percentage “strength” associated with the overlay. We also allow the
 user to manually enter the start date of each overlay
-(<code>"plot_cx"</code>) and the width of each overlay
-(<code>"plot_cw"</code>). Here, <code>"plot_label"</code>,
-<code>"plot_cx"</code>, and <code>"plot_cw"</code> will automatically
-set the label, position, and width of each overlay because
-<code>"label"</code>, <code>"cx"</code>, and <code>"cw"</code> are
+(<code>"display_cx"</code>) and the width of each overlay
+(<code>"display_cw"</code>). Here, <code>"display_cx"</code> and
+<code>"display_cw"</code> will automatically set the position and width
+of each overlay because <code>"cx"</code> and <code>"cw"</code> are
 interpreted specially by <code>overshiny</code>. <code>"strength"</code>
 doesn’t have any special interpretation so it will be applied to
-<code>ov$data$strength</code>. See the documentation for
-<code><a href="../reference/overlayServer.html">overlayServer()</a></code> for more details.</p>
-<p>The line <code>i &lt;- req(ov$editing)</code> just gets the index (1
-to 8) of the current overlay being edited. The call to
-<code><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req()</a></code> ensures that the rest of the code in the
-<code><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI()</a></code> call won’t be run unless there is an overlay
-currently being edited via its dropdown menu.</p>
-<p>Note that above, each overlay has the same elements in its dropdown
+<code>ov$data$strength</code>. Note that the IDs of all these UI widgets
+start with <code>"display_"</code> because we gave our
+<code><a href="../reference/overlayPlotOutput.html">overlayPlotOutput()</a></code> the ID <code>"display"</code> in the
+UI. See the documentation for <code><a href="../reference/overlayServer.html">overlayServer()</a></code> for more
+details.</p>
+<p>It’s important here to set the “starting value” for each of the three
+custom input widgets using values from the <code>ov</code> object. If we
+just supplied some “default” value for each of these, this value would
+reset each time we opened the dropdown menu.</p>
+<p>In this example, each overlay has the same elements in its dropdown
 menu, but we could choose to return different contents for the dropdown
-menu depending on which overlay is being edited.</p>
+menu depending on which overlay <code>i</code> is being edited.</p>
 <p>Now let’s make some data to plot based on the overlays and their
 properties:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -220,7 +232,7 @@ object returned by <code><a href="../reference/overlayServer.html">overlayServer
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>    <span class="co"># --- RENDERING OF DATA ---</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="co"># Render plot and align overlays to current axis limits</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    output<span class="sc">$</span>plot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    output<span class="sc">$</span>display <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>        plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">data</span>()) <span class="sc">+</span></span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>            <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> y)) <span class="sc">+</span></span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>            <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">3</span>) <span class="sc">+</span></span>
