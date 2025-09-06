@@ -1,4 +1,4 @@
-# For version 0.1.2
+# For version 0.2.0
 
 Overlay dropdowns:
 x make remove button look nicer (actionLink instead?)
