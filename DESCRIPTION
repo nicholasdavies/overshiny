@@ -1,7 +1,7 @@
 Package: overshiny
 Type: Package
 Title: Interactive Overlays on 'shiny' Plots
-Version: 0.1.1.9000
+Version: 0.2.0
 Authors@R: person("Nick", "Davies", email = "nicholas.davies@lshtm.ac.uk", role = c("aut", "cre", "cph"))
 Description: Provides rectangular elements that can be dragged and resized over
  plots in 'shiny' apps. This may be useful in applications where users need

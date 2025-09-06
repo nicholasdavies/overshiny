@@ -1,4 +1,4 @@
-# overshiny (development version)
+# overshiny 0.2.0
 
 * Simplified use of overlay dropdown menus. This now works in a different way
 than it did before, so this is a breaking change. See the documentation for
