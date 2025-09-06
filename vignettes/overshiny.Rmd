@@ -71,7 +71,7 @@ server <- function(input, output, session)
 
     # Initialise 8 draggable/resizable overlays
     ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
-        data = list(strength = 50), snap = snap_grid())
+        data = list(strength = 50), snap = snapGrid())
 
     # Toggle overlay visibility based on checkbox
     observe({
@@ -86,8 +86,8 @@ coordinates. We'll be plotting a time series, so this means 56 days (8 weeks).
 It provides the argument `data`, which is a list of additional attributes to be
 associated with each overlay. Here we're specifying that each overlay will have 
 an associated `strength` attribute, which we'll use to determine how much each
-overlay affects the output. And finally, we use `snap = snap_grid()` to specify
-a snapping function; the default parameters for `snap_grid()` ensure that each
+overlay affects the output. And finally, we use `snap = snapGrid()` to specify
+a snapping function; the default parameters for `snapGrid()` ensure that each
 overlay's position and width is snapped to the nearest whole number.
 
 Then, we start with some of the reactive logic of the overlays. We have a 

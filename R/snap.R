@@ -20,14 +20,14 @@
 #'
 #' @examples
 #' server <- function(input, output) {
-#'     ov <- overlayServer("my_plot", 8, snap = snap_grid())
+#'     ov <- overlayServer("my_plot", 8, snap = snapGrid())
 #'     # further server code here . . .
 #' }
 #'
 #' @seealso [overlayServer()], for a complete example.
 #'
 #' @export
-snap_grid = function(anchor = 0, step = 1,
+snapGrid = function(anchor = 0, step = 1,
     min_width = NA, max_width = NA) function(ov, i)
 {
     # Helper: snap x to nearest grid point

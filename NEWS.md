@@ -2,6 +2,8 @@
 
 * Simplified use of overlay dropdown menus.
 * Added a new vignette on infectious disease modelling with overlays.
+* Introduced a new function, `snapGrid()`, to handle the more obvious use case
+  for the `snap` argument to `overlayServer()`.
 
 # overshiny 0.1.1
 

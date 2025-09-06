@@ -79,7 +79,7 @@ server <- function(input, output, session)
 
     # Initialise 8 draggable/resizable overlays
     ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
-        data = list(strength = 50), snap = snap_grid())
+        data = list(strength = 50), snap = snapGrid())
 
     # Toggle overlay visibility based on checkbox
     observe({

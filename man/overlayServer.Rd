@@ -31,7 +31,7 @@ the overlay dropdown menu.}
 
 \item{snap}{Function to "snap" overlay coordinates to a grid, or \code{"none"}
 (default) for no snapping. See details for how to specify the snap
-function; you can also use the built-in \code{\link[=snap_grid]{snap_grid()}}.}
+function; you can also use the built-in \code{\link[=snapGrid]{snapGrid()}}.}
 
 \item{colours}{A function to assign custom colours to the overlays. Should
 be a function that takes a single integer (the number of overlays) and
@@ -141,7 +141,7 @@ the x axis range of the plot changes, so it may be a good idea to provide
 one if the user might place an overlay onto the plot, but then change the x
 axis range of the plot such that the overlay is no longer visible. You can
 detect this by verifying whether the overlay rectangles are "out of bounds"
-at the top of your snapping function. See the code for \code{\link[=snap_grid]{snap_grid()}} for
+at the top of your snapping function. See the code for \code{\link[=snapGrid]{snapGrid()}} for
 ideas.
 }
 \examples{
@@ -152,7 +152,7 @@ ui <- shiny::fluidPage(
 )
 
 server <- function(input, output) {
-    ov <- overlayServer("my_plot", 4, 1, snap = snap_grid())
+    ov <- overlayServer("my_plot", 4, 1, snap = snapGrid())
 
     output$my_plot_menu <- renderUI({
         i <- req(ov$editing)

@@ -45,7 +45,7 @@ server <- function(input, output)
 
     # Initialise 8 draggable/resizable overlays
     ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
-        data = list(vac_rate = 10, int_strength = 20), snap = snap_grid())
+        data = list(vac_rate = 10, int_strength = 20), snap = snapGrid())
 
     # --- OVERLAY DROPDOWN MENU ---
 
