@@ -2,16 +2,10 @@ Package: overshiny
 Type: Package
 Title: Interactive Overlays on 'shiny' Plots
 Version: 0.1.1.9000
-Authors@R: c(
-    person(
-      "Nick", "Davies",
-      email = "nicholas.davies@lshtm.ac.uk",
-      role = c("aut", "cre", "cph")
-    )
-  )
+Authors@R: person("Nick", "Davies", email = "nicholas.davies@lshtm.ac.uk", role = c("aut", "cre", "cph"))
 Description: Provides rectangular elements that can be dragged and resized over
-    plots in 'shiny' apps. This may be useful in applications where users need 
-    to mark regions on the plot for further input or processing.
+ plots in 'shiny' apps. This may be useful in applications where users need
+ to mark regions on the plot for further input or processing.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -20,19 +14,19 @@ BugReports: https://github.com/nicholasdavies/overshiny/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
-    cowplot,
-    ggplot2,
-    graphics,
-    grDevices,
-    grid,
-    htmltools,
-    shiny,
-    shinyjs,
-    shinyjqui,
-    stringr
+ cowplot,
+ ggplot2,
+ graphics,
+ grDevices,
+ grid,
+ htmltools,
+ shiny,
+ shinyjs,
+ shinyjqui,
+ stringr
 Suggests: 
-    knitr,
-    rmarkdown,
-    testthat (>= 3.0.0)
+ knitr,
+ rmarkdown,
+ testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
