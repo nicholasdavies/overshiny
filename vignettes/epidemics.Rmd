@@ -437,7 +437,7 @@ ui <- fluidPage(
     
     # NEW PART IS HERE:
     # Main plot
-    plotOutput("plot", width = "100%", height = 400),
+    plotOutput("display", width = "100%", height = 400),
     # END OF NEW PART
 
     # 3 columns of inputs
@@ -468,7 +468,7 @@ ui <- fluidPage(
 ```
 
 The bit we added was a `plotOutput` call, which puts space in the app for a 
-plot (either `ggplot2` or base R plot) with the ID `"plot"`. To connect this
+plot (either `ggplot2` or base R plot) with the ID `"display"`. To connect this
 plot with the inputs, we need to add some code to our `server` function, so
 put this code underneath what you have already:
 
@@ -476,7 +476,7 @@ put this code underneath what you have already:
 # --- App logic ---
 server <- function(input, output)
 {
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         results <- run_model(input)
         results <- results[results$compartment == "infectious", ]
         ggplot(results) +
@@ -496,9 +496,9 @@ manipulate the various input controls.
 
 That handful of lines in `server` is doing a lot. First, note that we're 
 calling the `shiny` function `renderPlot`, and assigning the value to 
-`output$plot`. The reason `output$plot` exists is because we put a 
-`plotOutput` in the `shiny` UI with ID `"plot"` -- this makes an entry in
-`output` called `plot` which is ready to receive a plot from the server
+`output$display`. The reason `output$display` exists is because we put a 
+`plotOutput` in the `shiny` UI with ID `"display"` -- this makes an entry in
+`output` called `display` which is ready to receive a plot from the server
 function. If in our UI, we had given our `plotOutput` a different ID, like:
 
 ```{r, eval=FALSE}
@@ -588,7 +588,7 @@ ui <- fluidPage(
     
     # NEW PART IS HERE:
     # Main plot
-    plotOutput("plot", width = "100%", height = 400),
+    plotOutput("display", width = "100%", height = 400),
     # END OF NEW PART
 
     # 3 columns of inputs
@@ -620,7 +620,7 @@ ui <- fluidPage(
 # --- App logic ---
 server <- function(input, output)
 {
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         results <- run_model(input)
         results <- results[results$compartment == "infectious", ]
         ggplot(results) +
@@ -646,7 +646,7 @@ Second, we need to change our `plotOutput` plot in our UI to an
 
 ```{r, eval = FALSE}
     # Main plot
-    overlayPlotOutput("plot", width = "100%", height = 400),
+    overlayPlotOutput("display", width = "100%", height = 400),
 ```
 
 Third, we need to add some `overlayToken()`s that can be dragged onto the plot.
@@ -671,17 +671,20 @@ server <- function(input, output)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8)
+    ov <- overlayServer("display", 8)
 
     # rest of code follows as normal...
 ```
+
+We need to provide `overlayServer` with the id of our `overlayPlot` (here, 
+`"display"`) and the maximum number of overlays to support.
 
 And finally, we need to modify our call to `renderPlot()` in the `server` 
 function to tell `overshiny` more information about our plot. Where before we 
 had:
 
 ```{r, eval = FALSE}
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         results <- run_model(input)
         results <- results[results$compartment == "infectious", ]
         ggplot(results) +
@@ -695,7 +698,7 @@ had:
 Now, we have:
 
 ```{r, eval = FALSE}
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         results <- run_model(input)
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
@@ -775,7 +778,7 @@ ui <- fluidPage(
     
     # NEW PART IS HERE:
     # Main plot
-    overlayPlotOutput("plot", width = "100%", height = 400),
+    overlayPlotOutput("display", width = "100%", height = 400),
     # END OF NEW PART
 
     # 3 columns of inputs
@@ -812,11 +815,11 @@ server <- function(input, output)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8)
+    ov <- overlayServer("display", 8)
     
     # --- RENDERING OF EPI CURVES ---
 
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         results <- run_model(input)
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
@@ -872,7 +875,7 @@ have been placed onto the plot, and fills out the `intervention` and
 `vaccination` parameters accordingly.
 
 ```{r, eval = FALSE}
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         # Create interventions
         tx_int <- list()
         vax <- NULL
@@ -960,7 +963,7 @@ ui <- fluidPage(
     
     # NEW PART IS HERE:
     # Main plot
-    overlayPlotOutput("plot", width = "100%", height = 400),
+    overlayPlotOutput("display", width = "100%", height = 400),
     # END OF NEW PART
 
     # 3 columns of inputs
@@ -997,11 +1000,11 @@ server <- function(input, output)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8)
+    ov <- overlayServer("display", 8)
     
     # --- RENDERING OF EPI CURVES ---
 
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         # Create interventions
         tx_int <- list()
         vax <- NULL
@@ -1056,7 +1059,7 @@ shinyApp(ui, server)
 Compare the new call to `renderPlot()` to what we had before, which was:
 
 ```{r, eval = FALSE}
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         results <- run_model(input)
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
@@ -1191,7 +1194,7 @@ ui <- fluidPage(
     titlePanel("SEIRV model with interventions"),
 
     # Main plot with support for overlays
-    overlayPlotOutput("plot", width = "100%", height = 400),
+    overlayPlotOutput("display", width = "100%", height = 400),
 
     # 3 columns of inputs
     fluidRow(
@@ -1227,26 +1230,26 @@ server <- function(input, output)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
+    ov <- overlayServer("display", 8, width = 56, # 56 days = 8 weeks default width
         data = list(vac_rate = 10, int_strength = 20), snap = snapGrid())
 
     # --- OVERLAY DROPDOWN MENU ---
 
     # Render dropdown menu when an overlay is being edited
-    output$plot_menu <- renderUI({
+    output$display_menu <- renderUI({
         i <- req(ov$editing)  # Current overlay being edited
         fmt <- function(t) format(as.Date(t, origin = "1970-01-01"), "%b %d")
 
         dropdown <- list(
             div(paste(fmt(ov$cx0[i]), "–", fmt(ov$cx1[i]))),
-            selectInput("plot_label", NULL, choices = c("Vaccination", "Transmission"), selected = ov$label[i])
+            selectInput("display_label", NULL, choices = c("Vaccination", "Transmission"), selected = ov$label[i])
         )
 
         if (ov$label[i] == "Vaccination") {
-            dropdown[[3]] <- numericInput("plot_vac_rate", "Vaccines per day (thousands)",
+            dropdown[[3]] <- numericInput("display_vac_rate", "Vaccines per day (thousands)",
                 value = ov$data$vac_rate[i], min = 0, max = 10000)
         } else if (ov$label[i] == "Transmission") {
-            dropdown[[3]] <- sliderInput("plot_int_strength", "Transmission reduction (%)",
+            dropdown[[3]] <- sliderInput("display_int_strength", "Transmission reduction (%)",
                 value = ov$data$int_strength[i], min = 0, max = 100)
         }
 
@@ -1325,7 +1328,7 @@ server <- function(input, output)
     # --- RENDERING OF EPI CURVES ---
 
     # Render plot and align overlays to current axis limits
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         plot <- ggplot() +
             geom_line(data = epi_unmitigated(),
                 aes(x = date, y = value/1000), alpha = 0.5) +

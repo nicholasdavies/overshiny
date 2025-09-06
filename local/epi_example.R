@@ -8,7 +8,7 @@ ui <- fluidPage(
     titlePanel("SEIRV model with interventions"),
 
     # Main plot with support for overlays
-    overlayPlotOutput("plot", width = "100%", height = 400),
+    overlayPlotOutput("display", width = "100%", height = 400),
 
     # 3 columns of inputs
     fluidRow(
@@ -32,8 +32,8 @@ ui <- fluidPage(
         column(4,
             # Overlay controls: tokens that can be dragged onto the plot
             h3("Interventions"),
-            overlayToken("vax", "Vaccination"),
-            overlayToken("txi", "Transmission")
+            overlayToken("vx", "Vaccination"),
+            overlayToken("tx", "Transmission")
         )
     )
 )
@@ -44,26 +44,26 @@ server <- function(input, output)
     # --- OVERLAY SETUP ---
 
     # Initialise 8 draggable/resizable overlays
-    ov <- overlayServer("plot", 8, width = 56, # 56 days = 8 weeks default width
+    ov <- overlayServer("display", 8, width = 56, # 56 days = 8 weeks default width
         data = list(vac_rate = 10, int_strength = 20), snap = snapGrid())
 
     # --- OVERLAY DROPDOWN MENU ---
 
     # Render dropdown menu when an overlay is being edited
-    output$plot_menu <- renderUI({
+    output$display_menu <- renderUI({
         i <- req(ov$editing)  # Current overlay being edited
         fmt <- function(t) format(as.Date(t, origin = "1970-01-01"), "%b %d")
 
         dropdown <- list(
             div(paste(fmt(ov$cx0[i]), "–", fmt(ov$cx1[i]))),
-            selectInput("plot_label", NULL, choices = c("Vaccination", "Transmission"), selected = ov$label[i])
+            selectInput("display_label", NULL, choices = c("Vaccination", "Transmission"), selected = ov$label[i])
         )
 
         if (ov$label[i] == "Vaccination") {
-            dropdown[[3]] <- numericInput("plot_vac_rate", "Vaccines per day (thousands)",
+            dropdown[[3]] <- numericInput("display_vac_rate", "Vaccines per day (thousands)",
                 value = ov$data$vac_rate[i], min = 0, max = 10000)
         } else if (ov$label[i] == "Transmission") {
-            dropdown[[3]] <- sliderInput("plot_int_strength", "Transmission reduction (%)",
+            dropdown[[3]] <- sliderInput("display_int_strength", "Transmission reduction (%)",
                 value = ov$data$int_strength[i], min = 0, max = 100)
         }
 
@@ -142,7 +142,7 @@ server <- function(input, output)
     # --- RENDERING OF EPI CURVES ---
 
     # Render plot and align overlays to current axis limits
-    output$plot <- renderPlot({
+    output$display <- renderPlot({
         plot <- ggplot() +
             geom_line(data = epi_unmitigated(),
                 aes(x = date, y = value/1000), alpha = 0.5) +
