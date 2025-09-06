@@ -148,7 +148,8 @@ server <- function(input, output)
                 aes(x = date, y = value/1000), alpha = 0.5) +
             geom_line(data = epi_mitigated(),
                 aes(x = date, y = value/1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
 
         overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })

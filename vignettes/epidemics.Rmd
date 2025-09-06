@@ -481,7 +481,8 @@ server <- function(input, output)
         results <- results[results$compartment == "infectious", ]
         ggplot(results) +
             geom_line(aes(x = time, y = value)) +
-            labs(x = NULL, y = "Infection prevalence")
+            labs(x = NULL, y = "Infection prevalence") +
+            ylim(0, NA)
     })
 }
 
@@ -532,7 +533,8 @@ changing the call to `ggplot`:
 ```{r eval=FALSE}
 ggplot(results) +
     geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-    labs(x = NULL, y = "Infection prevalence (thousands)")
+    labs(x = NULL, y = "Infection prevalence (thousands)") +
+    ylim(0, NA)
 ```
 </details> 
 
@@ -623,7 +625,8 @@ server <- function(input, output)
         results <- results[results$compartment == "infectious", ]
         ggplot(results) +
             geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
     })
 }
 
@@ -683,7 +686,8 @@ had:
         results <- results[results$compartment == "infectious", ]
         ggplot(results) +
             geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
     })
 
 ```
@@ -696,7 +700,8 @@ Now, we have:
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
             geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
         
         overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })
@@ -816,7 +821,8 @@ server <- function(input, output)
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
             geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
         
         overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })
@@ -906,7 +912,8 @@ have been placed onto the plot, and fills out the `intervention` and
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
             geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
         
         overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })
@@ -1034,7 +1041,8 @@ server <- function(input, output)
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
             geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
         
         overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })
@@ -1053,7 +1061,8 @@ Compare the new call to `renderPlot()` to what we had before, which was:
         results <- results[results$compartment == "infectious", ]
         plot <- ggplot(results) +
             geom_line(aes(x = time + input$date_range[1], y = value / 1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
         
         overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })
@@ -1322,7 +1331,8 @@ server <- function(input, output)
                 aes(x = date, y = value/1000), alpha = 0.5) +
             geom_line(data = epi_mitigated(),
                 aes(x = date, y = value/1000)) +
-            labs(x = NULL, y = "Infection prevalence (thousands)")
+            labs(x = NULL, y = "Infection prevalence (thousands)") +
+            ylim(0, NA)
 
         overlayBounds(ov, plot, xlim = c(input$date_range), ylim = c(0, NA))
     })
