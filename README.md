@@ -22,7 +22,7 @@ overlay token)
 
 ## Installation
 
-You can install the released version of overshiny from CRAN:
+You can install the released version of overshiny from [CRAN](https://cran.r-project.org/web/packages/overshiny/index.html):
 
 ``` r
 install.packages("overshiny")
