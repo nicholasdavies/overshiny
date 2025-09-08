@@ -1,3 +1,5 @@
+# overshiny (development version)
+
 # overshiny 0.2.0
 
 * Simplified use of overlay dropdown menus. This now works in a different way
